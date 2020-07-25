@@ -22,6 +22,9 @@ disqusShortname = "alasdairsykes"
 paginate = 7
 canonifyurls = true
 
+# files to ignore in build
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+
 [permalinks]
   post = "/:year/:month/:slug/"
 
@@ -84,11 +87,23 @@ canonifyurls = true
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-github\"></i>"
   url = "https://github.com/aj-sykes92"
 [[menu.links]]
-  weight = 1
+  weight = 2
   identifier = "twitter"
   name = "Twitter"
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-twitter\"></i>"
   url = "https://twitter.com/alasdair_sykes"
+[[menu.links]]
+  weight = 3
+  identifier = "scholar"
+  name = "Google Scholar"
+  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-google\"></i>"
+  url = "https://scholar.google.co.uk/citations?user=bipLv_YAAAAJ&hl=en"
+[[menu.links]]
+  weight = 4
+  identifier = "linkedin"
+  name = "LinkedIn"
+  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-linkedin\"></i>"
+  url = "https://www.linkedin.com/in/alasdair-sykes-1b81435a/"
 
 #[[menu.misc]]
 #  weight = 1
