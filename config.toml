@@ -104,13 +104,6 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
   name = "LinkedIn"
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-linkedin\"></i>"
   url = "https://www.linkedin.com/in/alasdair-sykes-1b81435a/"
-[[menu.links]]
-  weight = 4
-  identifier = "researchgate"
-  name = "ResearchGate"
-  #pre = "<i class=\"sidebar-button-icon fa fa-lg fa-brands:researchgate\"></i>"
-  pre = "<i class=\"fab fa-researchgate\"></i>"
-  url = "https://www.linkedin.com/in/alasdair-sykes-1b81435a/"
 
 #[[menu.misc]]
 #  weight = 1
