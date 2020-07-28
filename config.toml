@@ -35,7 +35,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 [author]
   name = "Alasdair Sykes PhD"
-  bio = "**Post-doctoral researcher** at [SRUC](https://www.sruc.ac.uk/asykes) | **Research software engineer** at [Agrecalc](https://www.agrecalc.com) | **Co-editor** at [Fringebiscuit](https://www.fringebiscuit.comm) | **Modeller & data scientist** with an interest in **agriculture & climate change**"
+  bio = "**Modeller & data scientist** with an interest in **agriculture & climate change** | **Post-doctoral researcher** at [SRUC](https://www.sruc.ac.uk/asykes) | **Research software engineer** at [Agrecalc](https://www.agrecalc.com) | **Co-editor** at [Fringebiscuit](https://www.fringebiscuit.comm) | Background image by [Art 'n' Click](https://artnclick.shootproof.com)"
   job = "Agricultural Systems Modeller"
   location = "Edinburgh, Scotland"
   # Your Gravatar email. Overwrite `author.picture` everywhere in the blog
@@ -107,10 +107,10 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 #[[menu.misc]]
 #  weight = 1
-#  identifier = "rss"
-#  name = "RSS"
-#  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-rss\"></i>"
-#  url = "/index.xml"
+#  identifier = "cover-image"
+#  name = "Background image"
+#  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-camera\"></i>"
+#  url = "https://artnclick.shootproof.com"
 
 [params]
   # Customize date format use to render blog post date, categories and other
