@@ -6,10 +6,73 @@
     <description>Recent content in Tags on Alasdair Sykes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 23 Jul 2015 21:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Tue, 28 Jul 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>natural language processing</title>
+      <link>/tags/natural-language-processing/</link>
+      <pubDate>Tue, 28 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/natural-language-processing/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pdf scraping</title>
+      <link>/tags/pdf-scraping/</link>
+      <pubDate>Tue, 28 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/pdf-scraping/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pdftools</title>
+      <link>/tags/pdftools/</link>
+      <pubDate>Tue, 28 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/pdftools/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>purrr</title>
+      <link>/tags/purrr/</link>
+      <pubDate>Tue, 28 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/purrr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>R Markdown</title>
+      <link>/tags/r-markdown/</link>
+      <pubDate>Tue, 28 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/r-markdown/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>tidyverse</title>
+      <link>/tags/tidyverse/</link>
+      <pubDate>Tue, 28 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tidyverse/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>web scraping</title>
+      <link>/tags/web-scraping/</link>
+      <pubDate>Tue, 28 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/web-scraping/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>plot</title>
@@ -17,15 +80,6 @@
       <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
       
       <guid>/tags/plot/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>R Markdown</title>
-      <link>/tags/r-markdown/</link>
-      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
-      
-      <guid>/tags/r-markdown/</guid>
       <description></description>
     </item>
     

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Hugo 0.73.0 with theme Tranquilpeak 0.4.8-BETA">
+<meta name="author" content="Alasdair Sykes PhD">
+<meta name="keywords" content="purrr, tidyverse, pdf scrape, natural language processing, web scrape, Great Courses">
+<meta name="description" content="I thought this would make as good a debut post as any for the new site. Here’s the challenge:
+My partner (the wonderful Aisha Josiah) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home, I’ve also been looking for ways to feel like I’m doing more than just passing time.">
+
+
+<meta property="og:description" content="I thought this would make as good a debut post as any for the new site. Here’s the challenge:
+My partner (the wonderful Aisha Josiah) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home, I’ve also been looking for ways to feel like I’m doing more than just passing time.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PDF scraping with pdftools and purrr">
+<meta name="twitter:title" content="PDF scraping with pdftools and purrr">
+<meta property="og:url" content="/2020/07/web-and-pdf-scraping.en-us/">
+<meta property="twitter:url" content="/2020/07/web-and-pdf-scraping.en-us/">
+<meta property="og:site_name" content="Alasdair Sykes">
+<meta property="og:description" content="I thought this would make as good a debut post as any for the new site. Here’s the challenge:
+My partner (the wonderful Aisha Josiah) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home, I’ve also been looking for ways to feel like I’m doing more than just passing time.">
+<meta name="twitter:description" content="I thought this would make as good a debut post as any for the new site. Here’s the challenge:
+My partner (the wonderful Aisha Josiah) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home, I’ve also been looking for ways to feel like I’m doing more than just passing time.">
+<meta property="og:locale" content="en-us">
+
+  
+    <meta property="article:published_time" content="2020-07-28T00:00:00">
+  
+  
+    <meta property="article:modified_time" content="2020-07-28T00:00:00">
+  
+  
+  
+    
+      <meta property="article:section" content="R">
+    
+  
+  
+    
+      <meta property="article:tag" content="R Markdown">
+    
+      <meta property="article:tag" content="tidyverse">
+    
+      <meta property="article:tag" content="purrr">
+    
+      <meta property="article:tag" content="pdftools">
+    
+      <meta property="article:tag" content="web scraping">
+    
+      <meta property="article:tag" content="pdf scraping">
+    
+      <meta property="article:tag" content="natural language processing">
+    
+  
+
+
+<meta name="twitter:card" content="summary">
+
+  <meta name="twitter:site" content="@alasdair_sykes">
+
+
+  <meta name="twitter:creator" content="@alasdair_sykes">
+
+
+
+
+
+
+
+
+
+
+  <meta property="og:image" content="https://www.gravatar.com/avatar/3621eeb16f4a9466b1d52bc75f2c72b9?s=640">
+  <meta property="twitter:image" content="https://www.gravatar.com/avatar/3621eeb16f4a9466b1d52bc75f2c72b9?s=640">
+
+
+    <title>PDF scraping with pdftools and purrr</title>
+
+    <link rel="icon" href="images/favicon.ico">
+    
+
+    
+
+    <link rel="canonical" href="/2020/07/web-and-pdf-scraping.en-us/">
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.4/jquery.fancybox.min.css" integrity="sha256-vuXZ9LGmmwtjqFX1F+EKin1ThZMub58gKULUyf0qECk=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.4/helpers/jquery.fancybox-thumbs.min.css" integrity="sha256-SEa4XYAHihTcEP1f5gARTB2K26Uk8PsndQYHQC1f4jU=" crossorigin="anonymous" />
+    
+    
+    <link rel="stylesheet" href="/css/style-twzjdbqhmnnacqs0pwwdzcdbt8yhv8giawvjqjmyfoqnvazl0dalmnhdkvp7.min.css" />
+    
+    
+
+    
+      
+    
+    
+  </head>
+
+  <body>
+    <div id="blog">
+      <header id="header" data-behavior="4">
+  <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+  <div class="header-title">
+    <a class="header-title-link" href="/">Alasdair Sykes</a>
+  </div>
+  
+    
+      <a class="header-right-picture "
+         href="/#about">
+    
+    
+    
+      
+        <img class="header-picture" src="https://www.gravatar.com/avatar/3621eeb16f4a9466b1d52bc75f2c72b9?s=90" alt="Author&#39;s picture" />
+      
+    
+    </a>
+  
+</header>
+
+      <nav id="sidebar" data-behavior="4">
+  <div class="sidebar-container">
+    
+      <div class="sidebar-profile">
+        <a href="/#about">
+          <img class="sidebar-profile-picture" src="https://www.gravatar.com/avatar/3621eeb16f4a9466b1d52bc75f2c72b9?s=110" alt="Author&#39;s picture" />
+        </a>
+        <h4 class="sidebar-profile-name">Alasdair Sykes PhD</h4>
+        
+          <h5 class="sidebar-profile-bio"><strong>Modeller &amp; data scientist</strong> with an interest in <strong>agriculture &amp; climate change</strong> | <strong>Post-doctoral researcher</strong> at <a href="https://www.sruc.ac.uk/asykes">SRUC</a> | <strong>Research software engineer</strong> at <a href="https://www.agrecalc.com">Agrecalc</a> | <strong>Co-editor</strong> at <a href="https://www.fringebiscuit.comm">Fringebiscuit</a> | Background image by <a href="https://artnclick.shootproof.com">Art &lsquo;n&rsquo; Click</a></h5>
+        
+      </div>
+    
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+      
+      <span class="sidebar-button-desc">Home</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/#about">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-question"></i>
+      
+      <span class="sidebar-button-desc">About</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/categories">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+      
+      <span class="sidebar-button-desc">Categories</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/tags">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+      
+      <span class="sidebar-button-desc">Tags</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/archives">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+      
+      <span class="sidebar-button-desc">Archives</span>
+    </a>
+  </li>
+
+
+    </ul>
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://github.com/aj-sykes92">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-github"></i>
+      
+      <span class="sidebar-button-desc">GitHub</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://twitter.com/alasdair_sykes">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-twitter"></i>
+      
+      <span class="sidebar-button-desc">Twitter</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://scholar.google.co.uk/citations?user=bipLv_YAAAAJ&amp;hl=en">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-google"></i>
+      
+      <span class="sidebar-button-desc">Google Scholar</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://www.linkedin.com/in/alasdair-sykes-1b81435a/">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-linkedin"></i>
+      
+      <span class="sidebar-button-desc">LinkedIn</span>
+    </a>
+  </li>
+
+
+    </ul>
+    <ul class="sidebar-buttons">
+      
+
+    </ul>
+  </div>
+</nav>
+
+      
+
+      <div id="main" data-behavior="4"
+        class="
+               hasCoverMetaIn
+               ">
+        <article class="post" itemscope itemType="http://schema.org/BlogPosting">
+          
+          
+            <div class="post-header main-content-wrap text-left">
+  
+    <h1 class="post-title" itemprop="headline">
+      PDF scraping with pdftools and purrr
+    </h1>
+  
+  
+  <div class="postShorten-meta post-meta">
+    
+      <time itemprop="datePublished" datetime="2020-07-28T00:00:00Z">
+        
+  July 28, 2020
+
+      </time>
+    
+    
+  
+  
+    <span>in</span>
+    
+      <a class="category-link" href="/categories/r">R</a>
+    
+  
+
+  </div>
+
+</div>
+          
+          <div class="post-content markdown" itemprop="articleBody">
+            <div class="main-content-wrap">
+              
+
+
+<p>I thought this would make as good a debut post as any for the new site. Here’s the challenge:</p>
+<p>My partner (the wonderful <a href="https://www.aishajosiah.com">Aisha Josiah</a>) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home, I’ve also been looking for ways to feel like I’m doing more than just passing time. As a result, we’ve used our subscriptions budget to sign up to <a href="https://www.thegreatcoursesplus.com">Great Courses Plus</a>, which is essentially geeky version of Netflix, streaming lecture series instead of shows. I thoroughly recommend it, by the way.</p>
+<p>Aisha’s predictably taking it a bit more seriously than I am. Recently, she became intensely frustrated that, despite the quality of their courses, the Great Courses’ documentation and indexing of their materials (particularly their supplementary .pdf files) is incredibly poor, and consequently very difficult to search properly. It’s hard to tell why, but it seems like they’ve updated and re-packaged their offerings once too often, and with too little care for the searchability of their courses. A bit of digging revealed, however, that their entire collection of supplementary materials (.pdf files with transcripts and figures to accompany the lectures) is hosted freely on their site under a series of sequential numeric URL slugs; but crazily, there’s no definitive index page which contains entries for each. Aisha wanted to be able to see it all in one place, and to see at a glance the key attributes and metadata for each course — without typing hundreds of random URLs into a web browser. I took on the challenge, which became:</p>
+<ol class="example" style="list-style-type: decimal">
+<li>Download the whole Great Courses supplementary materials collection (approximately 480 courses)</li>
+<li>Extract relevant information from the title pages of the files</li>
+<li>Write the files to a shared repository with informative, structured, searchable file names</li>
+</ol>
+<blockquote>
+<p><strong>Quick disclaimer:</strong> Opinions differ on the legality/moral righteousness of web scraping, particularly in cases where it might be against the wishes of the host (<a href="https://www.imperva.com/blog/is-web-scraping-illegal/">this</a> is quite an interesting discussion on that subject). Technically I guess this falls into the web scraping category since, while the files are in .pdf form, I’m retrieving them programmatically from a website. My conscience is clear on this one, since I’ve already got a paid-up subscription to the site in question, and the purpose of the scrape was to compensate for poor indexing by the host. Whether the lack of paywall on this material is an oversight or not is unclear, and so while you could (in theory) go get this material yourself, this blog post is <strong>in no way a suggestion that you do so</strong>. To this end, I’ve anonomised the base URL in the relevant code block. If you still want to do it, a quick Google will, I’m sure, furnish you with the missing information and then it’s between you and your conscience. Ok — onwards.</p>
+</blockquote>
+<p>First job was to put together a vector of the relevant URLs — these were identical, save for the numeric suffix (000004 to 000486). <code>stringr</code> (loaded with <code>tidyverse</code>) is a great part of the toolbox for this sort of thing:</p>
+<pre class="r"><code>library(tidyverse)
+
+# create vector of url strings
+root &lt;- &quot;http://some.url/domain/slug_&quot;
+
+number &lt;- 4:486 %&gt;%
+  as.character() %&gt;%
+  str_pad(width = 6, side = &quot;left&quot;, pad = &quot;0&quot;)
+
+urls &lt;- paste0(root, number, &quot;.pdf&quot;)
+
+print(urls[1:5])</code></pre>
+<pre><code>## [1] &quot;http://some.url/domain/slug_000004.pdf&quot;
+## [2] &quot;http://some.url/domain/slug_000005.pdf&quot;
+## [3] &quot;http://some.url/domain/slug_000006.pdf&quot;
+## [4] &quot;http://some.url/domain/slug_000007.pdf&quot;
+## [5] &quot;http://some.url/domain/slug_000008.pdf&quot;</code></pre>
+<p>Side note. I’ve recently been making a concerted effort to move away from loops in <code>R</code> programming. Arguably it’s a transition I should have made some time ago, but an ever-increasing need to make my coding more robust, easier to read and understand, and more computationally efficient has put the final nail in the coffin of the <code>for</code> loop in my scripts. I’ve found functional programming and list-wise operations with <code>purrr</code> fill this gap perfectly, and <code>purrr</code> is much more intuitive to learn and use than the base <code>apply</code> family of functions. Accordingly, while I have many <code>for</code> loop-based scripts from previous web scrapes tucked away in various dusty filepaths, I started fresh with this one and worked list-wise instead.</p>
+<p>The next job was to extract the data from the first page of a test-case document, and build a workflow that would convert the extracted text from the first page of a pdf into something short and informative, that could itself be built into a useful filepath.</p>
+<p>First, we need to download a test case; this just uses a base <code>utils</code> function.</p>
+<pre class="r"><code># download a test pdf
+download.file(urls[1], destfile = &quot;testfile.pdf&quot;, mode = &quot;wb&quot;)</code></pre>
+<p>Here’s a snapshot of what that title page looks like:
+<br></p>
+<div class="figure">
+<img src="/post/2020-07-28-web-scraping-and-purrr.en-us_files/Screenshot%202020-08-03%20at%2009.22.06.png" alt="" />
+<p class="caption">Great Courses example page header</p>
+</div>
+<p>Now to load in <code>pdftools</code> and extract the text itself.</p>
+<pre class="r"><code>library(pdftools)
+testtext &lt;- pdf_text(&quot;testfile.pdf&quot;)
+
+print(testtext[[1]])</code></pre>
+<pre><code>## [1] &quot;                          Topic   Subtopic\n                          History Medieval History\n1066\nCourse Guidebook\nProfessor Jennifer Paxton\nGeorgetown University\n&quot;</code></pre>
+<p>All the information is there, albeit in fairly difficult to read form. The following <code>stringr</code> based function tidies it into a nice, neat filepath; it’s a bit piecemeal (I’m sure <em>regex</em> afficionados can think of numerous ways to tidy/shorten it), but in the spirit of full disclosure, I haven’t altered or neatened it any from how I threw it together for its original purpose.</p>
+<pre class="r"><code># function to build text into filepath
+build_filepath &lt;- function(text){
+  filename &lt;- text[[1]] %&gt;%
+    str_to_lower() %&gt;% # turn everything lowercase
+    str_replace_all(&quot;subtopic&quot;, &quot;&quot;) %&gt;% # remove the word &#39;subtopic&#39;
+    str_replace_all(&quot;topic&quot;, &quot;&quot;) %&gt;% # remove the word &#39;topic&#39;
+    str_replace_all(&quot;course guidebook&quot;, &quot;&quot;) %&gt;% # remove the phrase &#39;course guidebook&#39;
+    str_replace_all(&quot;\\W+&quot;, &quot;-&quot;) %&gt;% # replace all groups of non-word chars with a hyphen
+    str_replace_all(&quot;^\\W+&quot;, &quot;&quot;) %&gt;% # remove non-word chars at start of string
+    str_replace_all(&quot;\\W+$&quot;, &quot;.pdf&quot;) # remove non-word chars at end of string and add &#39;.pdf&#39;.
+  
+  filepath &lt;- paste0(&quot;pdf-directory/&quot;, filename)
+  
+  return(filepath)
+}
+
+# test function
+build_filepath(testtext)</code></pre>
+<pre><code>## [1] &quot;pdf-directory/history-medieval-history-1066-professor-jennifer-paxton-georgetown-university.pdf&quot;</code></pre>
+<p>Lovely. The final flourish is to wrap that function in something which will download the relevant pdf from the URL:</p>
+<pre class="r"><code># function to download pdf, save and rename
+scrape_pdf &lt;- function(url){
+  
+  # download file
+  download.file(url, destfile = &quot;temp.pdf&quot;, mode = &quot;wb&quot;)
+  
+  # extract text
+  text &lt;- pdf_text(&quot;temp.pdf&quot;)
+  
+  # resave
+  file.rename(&quot;temp.pdf&quot;, build_filepath(text))
+  
+}</code></pre>
+<p>Note that this function first saves the .pdf to a temporary location (<em>temp.pdf</em> in the base project directory). From there, it extracts the text, parses it into a filename, and uses this to rename the file using another <code>utils</code> function. Note also that the function itself doesn’t return anything, but rather works ‘behind-the-scenes’ directly from the relevant directory.</p>
+<p>A little testing revealed a couple of things. Firstly, not all the URLs in my vector were valid — most were, but one or two returned 404 errors. Secondly, some ball-park benchmarking let me know that it would take about 45 minutes for my script to run on all 400+ URLs, with most of the time going into the download process. Without anything to tell it otherwise, any list-wise operations with this function would terminate at the first error, and I didn’t want to have to sit and watch it work for the duration.</p>
+<p>This is typical of web scraping operations — they’re often lengthy, repetitive, and just different enough to fail occasionally. Trying to catch all the potential failure points in a loop is a real headache, and often takes several abortive attempts to fail-proof it. Fortunately, <code>purrr</code> provides a rich suite of tools to modify how functions are applied over lists, and massively simplifies this task.</p>
+<p>Here’s the syntax I ended up using:</p>
+<pre class="r"><code># run function
+walk(urls, possibly(scrape_pdf, otherwise = NA))</code></pre>
+<p>The <code>walk</code> part here is an alternative to the more commonly-used <code>map</code>; it’s useful since it triggers function side effects (i.e. all the behind-the-scenes stuff which is the sole purpose of this function) while returning the output invisibly. The <code>possibly</code> modifier is even more useful, since it gives me an option of telling the function what to return if things go wrong, allowing it to carry on regardless. I also really like that this syntax reads pretty damn close to an English sentence (<em>walk</em> the <em>urls</em> and <em>possibly</em> <em>scrape</em> the <em>pdf</em>, <em>otherwise</em> return <em>NA</em>). That’s in part due to <code>purrr</code>’s good design, and in part down to the ability that a functional programming style brings to name your operations something sensible. Since most of us inevitably spend significantly more time reading code than writing it, that’s invaluable.</p>
+<p>The story has a happy ending — Aisha is delighted with her well-indexed folder of course materials, and is working her way through it steadily and logically. And, pretty much on-brand for me, I more or less lost interest in the problem as soon as the coding bit was done, and have yet to actually look at any of them. I’ll get around to it sometime.</p>
+
+              
+            </div>
+          </div>
+          <div id="post-footer" class="post-footer main-content-wrap">
+            
+              
+                
+                
+                  <div class="post-footer-tags">
+                    <span class="text-color-light text-small">TAGGED IN</span><br/>
+                    
+  <a class="tag tag--primary tag--small" href="/tags/r-markdown/">R Markdown</a>
+
+  <a class="tag tag--primary tag--small" href="/tags/tidyverse/">tidyverse</a>
+
+  <a class="tag tag--primary tag--small" href="/tags/purrr/">purrr</a>
+
+  <a class="tag tag--primary tag--small" href="/tags/pdftools/">pdftools</a>
+
+  <a class="tag tag--primary tag--small" href="/tags/web-scraping/">web scraping</a>
+
+  <a class="tag tag--primary tag--small" href="/tags/pdf-scraping/">pdf scraping</a>
+
+  <a class="tag tag--primary tag--small" href="/tags/natural-language-processing/">natural language processing</a>
+
+                  </div>
+                
+              
+            
+            <div class="post-actions-wrap">
+  
+      <nav >
+        <ul class="post-actions post-action-nav">
+          
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <i class="fa fa-angle-left"></i>
+                  <span class="hide-xs hide-sm text-small icon-ml">NEXT</span>
+                </a>
+            </li>
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--default tooltip--top" href="/2015/07/hello-r-markdown/" data-tooltip="Hello R Markdown">
+              
+                  <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
+                  <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+          
+        </ul>
+      </nav>
+    <ul class="post-actions post-action-share" >
+      
+        <li class="post-action hide-lg hide-md hide-sm">
+          <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions">
+            <i class="fa fa-share-alt"></i>
+          </a>
+        </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=/2020/07/web-and-pdf-scraping.en-us/">
+              <i class="fa fa-facebook-official"></i>
+            </a>
+          </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=/2020/07/web-and-pdf-scraping.en-us/">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=/2020/07/web-and-pdf-scraping.en-us/">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        
+      
+      
+        <li class="post-action">
+          <a class="post-action-btn btn btn--default" href="#disqus_thread">
+            <i class="fa fa-comment-o"></i>
+          </a>
+        </li>
+      
+      <li class="post-action">
+        
+          <a class="post-action-btn btn btn--default" href="#">
+        
+          <i class="fa fa-list"></i>
+        </a>
+      </li>
+    </ul>
+  
+</div>
+
+            
+              
+                <div id="disqus_thread">
+  <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+              
+            
+          </div>
+        </article>
+        <footer id="footer" class="main-content-wrap">
+  <span class="copyrights">
+    &copy; 2020 Alasdair Sykes PhD. All Rights Reserved
+  </span>
+</footer>
+
+      </div>
+      <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+        <div class="post-actions-wrap">
+  
+      <nav >
+        <ul class="post-actions post-action-nav">
+          
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <i class="fa fa-angle-left"></i>
+                  <span class="hide-xs hide-sm text-small icon-ml">NEXT</span>
+                </a>
+            </li>
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--default tooltip--top" href="/2015/07/hello-r-markdown/" data-tooltip="Hello R Markdown">
+              
+                  <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
+                  <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+          
+        </ul>
+      </nav>
+    <ul class="post-actions post-action-share" >
+      
+        <li class="post-action hide-lg hide-md hide-sm">
+          <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions">
+            <i class="fa fa-share-alt"></i>
+          </a>
+        </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=/2020/07/web-and-pdf-scraping.en-us/">
+              <i class="fa fa-facebook-official"></i>
+            </a>
+          </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=/2020/07/web-and-pdf-scraping.en-us/">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=/2020/07/web-and-pdf-scraping.en-us/">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        
+      
+      
+        <li class="post-action">
+          <a class="post-action-btn btn btn--default" href="#disqus_thread">
+            <i class="fa fa-comment-o"></i>
+          </a>
+        </li>
+      
+      <li class="post-action">
+        
+          <a class="post-action-btn btn btn--default" href="#">
+        
+          <i class="fa fa-list"></i>
+        </a>
+      </li>
+    </ul>
+  
+</div>
+
+      </div>
+      <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+  <i id="btn-close-shareoptions" class="fa fa-close"></i>
+  <ul class="share-options">
+    
+      <li class="share-option">
+        <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=%2F2020%2F07%2Fweb-and-pdf-scraping.en-us%2F">
+          <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
+        </a>
+      </li>
+    
+      <li class="share-option">
+        <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=%2F2020%2F07%2Fweb-and-pdf-scraping.en-us%2F">
+          <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+        </a>
+      </li>
+    
+      <li class="share-option">
+        <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=%2F2020%2F07%2Fweb-and-pdf-scraping.en-us%2F">
+          <i class="fa fa-google-plus"></i><span>Share on Google&#43;</span>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+    </div>
+    
+    <div id="about">
+  <div id="about-card">
+    <div id="about-btn-close">
+      <i class="fa fa-remove"></i>
+    </div>
+    
+      <img id="about-card-picture" src="https://www.gravatar.com/avatar/3621eeb16f4a9466b1d52bc75f2c72b9?s=110" alt="Author&#39;s picture" />
+    
+    <h4 id="about-card-name">Alasdair Sykes PhD</h4>
+    
+      <div id="about-card-bio"><strong>Modeller &amp; data scientist</strong> with an interest in <strong>agriculture &amp; climate change</strong> | <strong>Post-doctoral researcher</strong> at <a href="https://www.sruc.ac.uk/asykes">SRUC</a> | <strong>Research software engineer</strong> at <a href="https://www.agrecalc.com">Agrecalc</a> | <strong>Co-editor</strong> at <a href="https://www.fringebiscuit.comm">Fringebiscuit</a> | Background image by <a href="https://artnclick.shootproof.com">Art &lsquo;n&rsquo; Click</a></div>
+    
+    
+      <div id="about-card-job">
+        <i class="fa fa-briefcase"></i>
+        <br/>
+        Agricultural Systems Modeller
+      </div>
+    
+    
+      <div id="about-card-location">
+        <i class="fa fa-map-marker"></i>
+        <br/>
+        Edinburgh, Scotland
+      </div>
+    
+  </div>
+</div>
+
+    
+
+    
+  
+    
+      <div id="cover" style="background-image:url('/images/ajs-cover3.jpg');"></div>
+    
+  
+
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.7/js/jquery.fancybox.min.js" integrity="sha256-GEAnjcTqVP+vBp3SSc8bEDQqvWAZMiHyUSIorrWwH50=" crossorigin="anonymous"></script>
+
+
+<script src="/js/script-pcw6v3xilnxydl1vddzazdverrnn9ctynvnxgwho987mfyqkuylcb1nlt.min.js"></script>
+
+
+<script lang="javascript">
+window.onload = updateMinWidth;
+window.onresize = updateMinWidth;
+document.getElementById("sidebar").addEventListener("transitionend", updateMinWidth);
+function updateMinWidth() {
+  var sidebar = document.getElementById("sidebar");
+  var main = document.getElementById("main");
+  main.style.minWidth = "";
+  var w1 = getComputedStyle(main).getPropertyValue("min-width");
+  var w2 = getComputedStyle(sidebar).getPropertyValue("width");
+  var w3 = getComputedStyle(sidebar).getPropertyValue("left");
+  main.style.minWidth = `calc(${w1} - ${w2} - ${w3})`;
+}
+</script>
+
+<script>
+$(document).ready(function() {
+  hljs.configure({ classPrefix: '', useBR: false });
+  $('pre.code-highlight > code, pre > code').each(function(i, block) {
+    if (!$(this).hasClass('codeblock')) {
+      $(this).addClass('codeblock');
+    }
+    hljs.highlightBlock(block);
+  });
+});
+</script>
+
+
+  
+    
+      <script>
+        var disqus_config = function () {
+          this.page.url = '\/2020\/07\/web-and-pdf-scraping.en-us\/';
+          
+            this.page.identifier = '\/2020\/07\/web-and-pdf-scraping.en-us\/'
+          
+        };
+        (function() {
+          
+          
+          if (window.location.hostname == "localhost") {
+            return;
+          }
+          var d = document, s = d.createElement('script');
+          var disqus_shortname = 'alasdairsykes';
+          s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+        })();
+      </script>
+    
+  
+
+
+
+
+    
+  </body>
+</html>
+

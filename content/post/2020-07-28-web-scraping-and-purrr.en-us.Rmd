@@ -1,0 +1,138 @@
+---
+title: PDF scraping with pdftools and purrr
+author: Alasdair Sykes
+date: '2020-07-28'
+slug: web-and-pdf-scraping.en-us
+categories:
+  - R
+tags:
+  - R Markdown
+  - tidyverse
+  - purrr
+  - pdftools
+  - web scraping
+  - pdf scraping
+  - natural language processing
+keywords:
+  - purrr
+  - tidyverse
+  - pdf scrape
+  - natural language processing
+  - web scrape
+  - Great Courses
+---
+
+I thought this would make as good a debut post as any for the new site. Here's the challenge:
+
+My partner (the wonderful [Aisha Josiah](https://www.aishajosiah.com)) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning --- and though I'm lucky enough to be working from home, I've also been looking for ways to feel like I'm doing more than just passing time. As a result, we've used our subscriptions budget to sign up to [Great Courses Plus](https://www.thegreatcoursesplus.com), which is essentially geeky version of Netflix, streaming lecture series instead of shows. I thoroughly recommend it, by the way.
+
+Aisha's predictably taking it a bit more seriously than I am. Recently, she became intensely frustrated that, despite the quality of their courses, the Great Courses' documentation and indexing of their materials (particularly their supplementary .pdf files) is incredibly poor, and consequently very difficult to search properly. It's hard to tell why, but it seems like they've updated and re-packaged their offerings once too often, and with too little care for the searchability of their courses. A bit of digging revealed, however, that their entire collection of supplementary materials (.pdf files with transcripts and figures to accompany the lectures) is hosted freely on their site under a series of sequential numeric URL slugs; but crazily, there's no definitive index page which contains entries for each. Aisha wanted to be able to see it all in one place, and to see at a glance the key attributes and metadata for each course --- without typing hundreds of random URLs into a web browser. I took on the challenge, which became:
+
+(@) Download the whole Great Courses supplementary materials collection (approximately 480 courses)
+(@) Extract relevant information from the title pages of the files
+(@) Write the files to a shared repository with informative, structured, searchable file names
+
+> **Quick disclaimer:** Opinions differ on the legality/moral righteousness of web scraping, particularly in cases where it might be against the wishes of the host ([this](https://www.imperva.com/blog/is-web-scraping-illegal/) is quite an interesting discussion on that subject). Technically I guess this falls into the web scraping category since, while the files are in .pdf form, I'm retrieving them programmatically from a website. My conscience is clear on this one, since I've already got a paid-up subscription to the site in question, and the purpose of the scrape was to compensate for poor indexing by the host. Whether the lack of paywall on this material is an oversight or not is unclear, and so while you could (in theory) go get this material yourself, this blog post is **in no way a suggestion that you do so**. To this end, I've anonomised the base URL in the relevant code block. If you still want to do it, a quick Google will, I'm sure, furnish you with the missing information and then it's between you and your conscience. Ok --- onwards.
+
+First job was to put together a vector of the relevant URLs --- these were identical, save for the numeric suffix (000004 to 000486). `stringr` (loaded with `tidyverse`) is a great part of the toolbox for this sort of thing:
+
+```{r message = F}
+library(tidyverse)
+
+# create vector of url strings
+root <- "http://some.url/domain/slug_"
+
+number <- 4:486 %>%
+  as.character() %>%
+  str_pad(width = 6, side = "left", pad = "0")
+
+urls <- paste0(root, number, ".pdf")
+
+print(urls[1:5])
+```
+
+Side note. I've recently been making a concerted effort to move away from loops in `R` programming. Arguably it's a transition I should have made some time ago, but an ever-increasing need to make my coding more robust, easier to read and understand, and more computationally efficient has put the final nail in the coffin of the `for` loop in my scripts. I've found functional programming and list-wise operations with `purrr` fill this gap perfectly, and `purrr` is much more intuitive to learn and use than the base `apply` family of functions. Accordingly, while I have many `for` loop-based scripts from previous web scrapes tucked away in various dusty filepaths, I started fresh with this one and worked list-wise instead.
+
+The next job was to extract the data from the first page of a test-case document, and build a workflow that would convert the extracted text from the first page of a pdf into something short and informative, that could itself be built into a useful filepath.
+
+```{r echo = F}
+urls[1] <- "http://download.audible.com/product_related_docs/BK_TCCO_000004.pdf"
+```
+
+First, we need to download a test case; this just uses a base `utils` function.
+```{r}
+# download a test pdf
+download.file(urls[1], destfile = "testfile.pdf", mode = "wb")
+```
+
+Here's a snapshot of what that title page looks like:
+<br>
+
+![Great Courses example page header](/post/2020-07-28-web-scraping-and-purrr.en-us_files/Screenshot 2020-08-03 at 09.22.06.png)
+
+Now to load in `pdftools` and extract the text itself.
+
+```{r message = F}
+library(pdftools)
+testtext <- pdf_text("testfile.pdf")
+
+print(testtext[[1]])
+```
+
+All the information is there, albeit in fairly difficult to read form. The following `stringr` based function tidies it into a nice, neat filepath; it's a bit piecemeal (I'm sure *regex* afficionados can think of numerous ways to tidy/shorten it), but in the spirit of full disclosure, I haven't altered or neatened it any from how I threw it together for its original purpose.
+
+```{r}
+# function to build text into filepath
+build_filepath <- function(text){
+  filename <- text[[1]] %>%
+    str_to_lower() %>% # turn everything lowercase
+    str_replace_all("subtopic", "") %>% # remove the word 'subtopic'
+    str_replace_all("topic", "") %>% # remove the word 'topic'
+    str_replace_all("course guidebook", "") %>% # remove the phrase 'course guidebook'
+    str_replace_all("\\W+", "-") %>% # replace all groups of non-word chars with a hyphen
+    str_replace_all("^\\W+", "") %>% # remove non-word chars at start of string
+    str_replace_all("\\W+$", ".pdf") # remove non-word chars at end of string and add '.pdf'.
+  
+  filepath <- paste0("pdf-directory/", filename)
+  
+  return(filepath)
+}
+
+# test function
+build_filepath(testtext)
+```
+
+Lovely. The final flourish is to wrap that function in something which will download the relevant pdf from the URL:
+
+```{r}
+# function to download pdf, save and rename
+scrape_pdf <- function(url){
+  
+  # download file
+  download.file(url, destfile = "temp.pdf", mode = "wb")
+  
+  # extract text
+  text <- pdf_text("temp.pdf")
+  
+  # resave
+  file.rename("temp.pdf", build_filepath(text))
+  
+}
+```
+  
+Note that this function first saves the .pdf to a temporary location (*temp.pdf* in the base project directory). From there, it extracts the text, parses it into a filename, and uses this to rename the file using another `utils` function. Note also that the function itself doesn't return anything, but rather works 'behind-the-scenes' directly from the relevant directory.
+
+A little testing revealed a couple of things. Firstly, not all the URLs in my vector were valid --- most were, but one or two returned 404 errors. Secondly, some ball-park benchmarking let me know that it would take about 45 minutes for my script to run on all 400+ URLs, with most of the time going into the download process. Without anything to tell it otherwise, any list-wise operations with this function would terminate at the first error, and I didn't want to have to sit and watch it work for the duration.
+
+This is typical of web scraping operations --- they're often lengthy, repetitive, and just different enough to fail occasionally. Trying to catch all the potential failure points in a loop is a real headache, and often takes several abortive attempts to fail-proof it. Fortunately, `purrr` provides a rich suite of tools to modify how functions are applied over lists, and massively simplifies this task.
+
+Here's the syntax I ended up using:
+
+```{r eval = F}
+# run function
+walk(urls, possibly(scrape_pdf, otherwise = NA))
+```
+
+The `walk` part here is an alternative to the more commonly-used `map`; it's useful since it triggers function side effects (i.e. all the behind-the-scenes stuff which is the sole purpose of this function) while returning the output invisibly. The `possibly` modifier is even more useful, since it gives me an option of telling the function what to return if things go wrong, allowing it to carry on regardless. I also really like that this syntax reads pretty damn close to an English sentence (*walk* the *urls* and *possibly* *scrape* the *pdf*, *otherwise* return *NA*). That's in part due to `purrr`'s good design, and in part down to the ability that a functional programming style brings to name your operations something sensible. Since most of us inevitably spend significantly more time reading code than writing it, that's invaluable.
+
+The story has a happy ending --- Aisha is delighted with her well-indexed folder of course materials, and is working her way through it steadily and logically. And, pretty much on-brand for me, I more or less lost interest in the problem as soon as the coding bit was done, and have yet to actually look at any of them. I'll get around to it sometime.

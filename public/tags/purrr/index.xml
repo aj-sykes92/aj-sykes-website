@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>purrr on Alasdair Sykes</title>
+    <link>/tags/purrr/</link>
+    <description>Recent content in purrr on Alasdair Sykes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 28 Jul 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/purrr/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>PDF scraping with pdftools and purrr</title>
+      <link>/2020/07/web-and-pdf-scraping.en-us/</link>
+      <pubDate>Tue, 28 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/07/web-and-pdf-scraping.en-us/</guid>
+      <description>I thought this would make as good a debut post as any for the new site. Here’s the challenge:
+My partner (the wonderful Aisha Josiah) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home, I’ve also been looking for ways to feel like I’m doing more than just passing time.</description>
+    </item>
+    
+  </channel>
+</rss>

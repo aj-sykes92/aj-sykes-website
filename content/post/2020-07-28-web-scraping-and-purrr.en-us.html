@@ -1,0 +1,114 @@
+---
+title: PDF scraping with pdftools and purrr
+author: Alasdair Sykes
+date: '2020-07-28'
+slug: web-and-pdf-scraping.en-us
+categories:
+  - R
+tags:
+  - R Markdown
+  - tidyverse
+  - purrr
+  - pdftools
+  - web scraping
+  - pdf scraping
+  - natural language processing
+keywords:
+  - purrr
+  - tidyverse
+  - pdf scrape
+  - natural language processing
+  - web scrape
+  - Great Courses
+---
+
+
+
+<p>I thought this would make as good a debut post as any for the new site. Here’s the challenge:</p>
+<p>My partner (the wonderful <a href="https://www.aishajosiah.com">Aisha Josiah</a>) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home, I’ve also been looking for ways to feel like I’m doing more than just passing time. As a result, we’ve used our subscriptions budget to sign up to <a href="https://www.thegreatcoursesplus.com">Great Courses Plus</a>, which is essentially geeky version of Netflix, streaming lecture series instead of shows. I thoroughly recommend it, by the way.</p>
+<p>Aisha’s predictably taking it a bit more seriously than I am. Recently, she became intensely frustrated that, despite the quality of their courses, the Great Courses’ documentation and indexing of their materials (particularly their supplementary .pdf files) is incredibly poor, and consequently very difficult to search properly. It’s hard to tell why, but it seems like they’ve updated and re-packaged their offerings once too often, and with too little care for the searchability of their courses. A bit of digging revealed, however, that their entire collection of supplementary materials (.pdf files with transcripts and figures to accompany the lectures) is hosted freely on their site under a series of sequential numeric URL slugs; but crazily, there’s no definitive index page which contains entries for each. Aisha wanted to be able to see it all in one place, and to see at a glance the key attributes and metadata for each course — without typing hundreds of random URLs into a web browser. I took on the challenge, which became:</p>
+<ol class="example" style="list-style-type: decimal">
+<li>Download the whole Great Courses supplementary materials collection (approximately 480 courses)</li>
+<li>Extract relevant information from the title pages of the files</li>
+<li>Write the files to a shared repository with informative, structured, searchable file names</li>
+</ol>
+<blockquote>
+<p><strong>Quick disclaimer:</strong> Opinions differ on the legality/moral righteousness of web scraping, particularly in cases where it might be against the wishes of the host (<a href="https://www.imperva.com/blog/is-web-scraping-illegal/">this</a> is quite an interesting discussion on that subject). Technically I guess this falls into the web scraping category since, while the files are in .pdf form, I’m retrieving them programmatically from a website. My conscience is clear on this one, since I’ve already got a paid-up subscription to the site in question, and the purpose of the scrape was to compensate for poor indexing by the host. Whether the lack of paywall on this material is an oversight or not is unclear, and so while you could (in theory) go get this material yourself, this blog post is <strong>in no way a suggestion that you do so</strong>. To this end, I’ve anonomised the base URL in the relevant code block. If you still want to do it, a quick Google will, I’m sure, furnish you with the missing information and then it’s between you and your conscience. Ok — onwards.</p>
+</blockquote>
+<p>First job was to put together a vector of the relevant URLs — these were identical, save for the numeric suffix (000004 to 000486). <code>stringr</code> (loaded with <code>tidyverse</code>) is a great part of the toolbox for this sort of thing:</p>
+<pre class="r"><code>library(tidyverse)
+
+# create vector of url strings
+root &lt;- &quot;http://some.url/domain/slug_&quot;
+
+number &lt;- 4:486 %&gt;%
+  as.character() %&gt;%
+  str_pad(width = 6, side = &quot;left&quot;, pad = &quot;0&quot;)
+
+urls &lt;- paste0(root, number, &quot;.pdf&quot;)
+
+print(urls[1:5])</code></pre>
+<pre><code>## [1] &quot;http://some.url/domain/slug_000004.pdf&quot;
+## [2] &quot;http://some.url/domain/slug_000005.pdf&quot;
+## [3] &quot;http://some.url/domain/slug_000006.pdf&quot;
+## [4] &quot;http://some.url/domain/slug_000007.pdf&quot;
+## [5] &quot;http://some.url/domain/slug_000008.pdf&quot;</code></pre>
+<p>Side note. I’ve recently been making a concerted effort to move away from loops in <code>R</code> programming. Arguably it’s a transition I should have made some time ago, but an ever-increasing need to make my coding more robust, easier to read and understand, and more computationally efficient has put the final nail in the coffin of the <code>for</code> loop in my scripts. I’ve found functional programming and list-wise operations with <code>purrr</code> fill this gap perfectly, and <code>purrr</code> is much more intuitive to learn and use than the base <code>apply</code> family of functions. Accordingly, while I have many <code>for</code> loop-based scripts from previous web scrapes tucked away in various dusty filepaths, I started fresh with this one and worked list-wise instead.</p>
+<p>The next job was to extract the data from the first page of a test-case document, and build a workflow that would convert the extracted text from the first page of a pdf into something short and informative, that could itself be built into a useful filepath.</p>
+<p>First, we need to download a test case; this just uses a base <code>utils</code> function.</p>
+<pre class="r"><code># download a test pdf
+download.file(urls[1], destfile = &quot;testfile.pdf&quot;, mode = &quot;wb&quot;)</code></pre>
+<p>Here’s a snapshot of what that title page looks like:
+<br></p>
+<div class="figure">
+<img src="/post/2020-07-28-web-scraping-and-purrr.en-us_files/Screenshot%202020-08-03%20at%2009.22.06.png" alt="" />
+<p class="caption">Great Courses example page header</p>
+</div>
+<p>Now to load in <code>pdftools</code> and extract the text itself.</p>
+<pre class="r"><code>library(pdftools)
+testtext &lt;- pdf_text(&quot;testfile.pdf&quot;)
+
+print(testtext[[1]])</code></pre>
+<pre><code>## [1] &quot;                          Topic   Subtopic\n                          History Medieval History\n1066\nCourse Guidebook\nProfessor Jennifer Paxton\nGeorgetown University\n&quot;</code></pre>
+<p>All the information is there, albeit in fairly difficult to read form. The following <code>stringr</code> based function tidies it into a nice, neat filepath; it’s a bit piecemeal (I’m sure <em>regex</em> afficionados can think of numerous ways to tidy/shorten it), but in the spirit of full disclosure, I haven’t altered or neatened it any from how I threw it together for its original purpose.</p>
+<pre class="r"><code># function to build text into filepath
+build_filepath &lt;- function(text){
+  filename &lt;- text[[1]] %&gt;%
+    str_to_lower() %&gt;% # turn everything lowercase
+    str_replace_all(&quot;subtopic&quot;, &quot;&quot;) %&gt;% # remove the word &#39;subtopic&#39;
+    str_replace_all(&quot;topic&quot;, &quot;&quot;) %&gt;% # remove the word &#39;topic&#39;
+    str_replace_all(&quot;course guidebook&quot;, &quot;&quot;) %&gt;% # remove the phrase &#39;course guidebook&#39;
+    str_replace_all(&quot;\\W+&quot;, &quot;-&quot;) %&gt;% # replace all groups of non-word chars with a hyphen
+    str_replace_all(&quot;^\\W+&quot;, &quot;&quot;) %&gt;% # remove non-word chars at start of string
+    str_replace_all(&quot;\\W+$&quot;, &quot;.pdf&quot;) # remove non-word chars at end of string and add &#39;.pdf&#39;.
+  
+  filepath &lt;- paste0(&quot;pdf-directory/&quot;, filename)
+  
+  return(filepath)
+}
+
+# test function
+build_filepath(testtext)</code></pre>
+<pre><code>## [1] &quot;pdf-directory/history-medieval-history-1066-professor-jennifer-paxton-georgetown-university.pdf&quot;</code></pre>
+<p>Lovely. The final flourish is to wrap that function in something which will download the relevant pdf from the URL:</p>
+<pre class="r"><code># function to download pdf, save and rename
+scrape_pdf &lt;- function(url){
+  
+  # download file
+  download.file(url, destfile = &quot;temp.pdf&quot;, mode = &quot;wb&quot;)
+  
+  # extract text
+  text &lt;- pdf_text(&quot;temp.pdf&quot;)
+  
+  # resave
+  file.rename(&quot;temp.pdf&quot;, build_filepath(text))
+  
+}</code></pre>
+<p>Note that this function first saves the .pdf to a temporary location (<em>temp.pdf</em> in the base project directory). From there, it extracts the text, parses it into a filename, and uses this to rename the file using another <code>utils</code> function. Note also that the function itself doesn’t return anything, but rather works ‘behind-the-scenes’ directly from the relevant directory.</p>
+<p>A little testing revealed a couple of things. Firstly, not all the URLs in my vector were valid — most were, but one or two returned 404 errors. Secondly, some ball-park benchmarking let me know that it would take about 45 minutes for my script to run on all 400+ URLs, with most of the time going into the download process. Without anything to tell it otherwise, any list-wise operations with this function would terminate at the first error, and I didn’t want to have to sit and watch it work for the duration.</p>
+<p>This is typical of web scraping operations — they’re often lengthy, repetitive, and just different enough to fail occasionally. Trying to catch all the potential failure points in a loop is a real headache, and often takes several abortive attempts to fail-proof it. Fortunately, <code>purrr</code> provides a rich suite of tools to modify how functions are applied over lists, and massively simplifies this task.</p>
+<p>Here’s the syntax I ended up using:</p>
+<pre class="r"><code># run function
+walk(urls, possibly(scrape_pdf, otherwise = NA))</code></pre>
+<p>The <code>walk</code> part here is an alternative to the more commonly-used <code>map</code>; it’s useful since it triggers function side effects (i.e. all the behind-the-scenes stuff which is the sole purpose of this function) while returning the output invisibly. The <code>possibly</code> modifier is even more useful, since it gives me an option of telling the function what to return if things go wrong, allowing it to carry on regardless. I also really like that this syntax reads pretty damn close to an English sentence (<em>walk</em> the <em>urls</em> and <em>possibly</em> <em>scrape</em> the <em>pdf</em>, <em>otherwise</em> return <em>NA</em>). That’s in part due to <code>purrr</code>’s good design, and in part down to the ability that a functional programming style brings to name your operations something sensible. Since most of us inevitably spend significantly more time reading code than writing it, that’s invaluable.</p>
+<p>The story has a happy ending — Aisha is delighted with her well-indexed folder of course materials, and is working her way through it steadily and logically. And, pretty much on-brand for me, I more or less lost interest in the problem as soon as the coding bit was done, and have yet to actually look at any of them. I’ll get around to it sometime.</p>
