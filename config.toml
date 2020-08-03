@@ -63,22 +63,28 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
   url = "/#about"
 [[menu.main]]
   weight = 3
+  identifier = "cv"
+  name = "CV"
+  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-file\"></i>"
+  url = "/alasdair-cv.pdf"
+[[menu.main]]
+  weight = 4
   identifier = "categories"
   name = "Categories"
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-bookmark\"></i>"
   url = "/categories"
 [[menu.main]]
-  weight = 4
+  weight = 5
   identifier = "tags"
   name = "Tags"
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-tags\"></i>"
   url = "/tags"
-[[menu.main]]
-  weight = 5
-  identifier = "archives"
-  name = "Archives"
-  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-archive\"></i>"
-  url = "/archives"
+#[[menu.main]]
+#  weight = 6
+#  identifier = "archives"
+#  name = "Archives"
+#  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-archive\"></i>"
+#  url = "/archives"
 
 [[menu.links]]
   weight = 1
