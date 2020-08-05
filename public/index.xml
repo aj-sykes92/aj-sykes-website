@@ -17,7 +17,56 @@
       <pubDate>Tue, 04 Aug 2020 00:00:00 +0000</pubDate>
       
       <guid>/2020/08/migrating-your-workflow-to-r.en-us/</guid>
-      <description>When you look at the online portfolios of established, social-media-present R aficionados, it’s tempting to assume that these folks were born authoring documents in Markdown and piecing together impossibly neat workflows to solve problems that the rest of us are too damn mundane to understand, let alone solve. I think this feeling of comparative inadequacy is particularly prevalent for the occasional useR who comes from a natural science, rather than a computational or mathematical background; most of us from this side of the tracks come to R to solve particular problems in our daily workflow (be it statistical testing, data visualisation, big data handling etc.</description>
+      <description>
+
+
+&lt;p&gt;When you look at the online portfolios of established, social-media-present R aficionados, it’s tempting to assume that these folks were born authoring documents in Markdown and piecing together impossibly neat workflows to solve problems that the rest of us are too damn mundane to understand, let alone solve. I think this feeling of comparative inadequacy is particularly prevalent for the occasional useR who comes from a natural science, rather than a computational or mathematical background; most of us from this side of the tracks come to R to solve particular problems in our daily workflow (be it statistical testing, data visualisation, big data handling etc.) rather than as an intellectual exercise in and of itself.&lt;/p&gt;
+&lt;p&gt;As a result, it takes quite a bit of mental effort for us to leave aside those specific problems for long enough and actually consider making R the basis, rather than a component, of our daily workflow. I’ve recently made this switch, and, with the zeal of the newly enlightened, I’m now going to talk to you about it. Since going all-in on R is quite a challenging prospect for those of us who’ve been brought up in the comforting azure glow of the Microsoft Office suite, this blog post is basically a blow-by-blow account of the baby steps you can take in the direction of an R-based daily workflow. It’s directly informed by my own journey, which means it’s by no means the best, fastest or most efficient way to do things. My journey in this direction is also, I’m sure, far from complete. Nonetheless, if, like me, you’re an academic with no formal programming training, but a regular ‘practical’ R user, I hope it might be an interesting read.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Before I start&lt;/strong&gt;. This is already shaping up to be a long-ass blog post, so I’m going to try and keep these steps as brief as possible; this is more of a &lt;strong&gt;what’s-possible&lt;/strong&gt; than a &lt;strong&gt;how-to&lt;/strong&gt; post. It took me quite a lot of trial and error to figure out some of these steps, so I hope that by collating them all in one place, I might cut down that messing-about time for others. I’m also definitely not the best person to explain the intricacies of completing each step, so where appropriate, I’ll point you in the direction of those who are. Ok — onwards.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div id=&#34;start-using-r-markdown-for-everyday-data-analysis-and-communication&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;1. Start using R Markdown for everyday data analysis and communication&lt;/h1&gt;
+&lt;p&gt;I came to this way, way later than I should have. Assuming you’re writing R scripts to do your data analysis, there is no reason that you shoudn’t or couldn’t be writing .Rmd documents. It is a markdown language, so it looks and feels different to writing a document in a word processor, but it’s super intuitive to use, and (crucially) very easy to incorporate functional R code into. If you can write basic code in R, and you can write an email, you can write R Markdown. &lt;a href=&#34;https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf&#34;&gt;This&lt;/a&gt; cheatsheet is really all you need to get started. Try the following:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;Next time you have a question about an R script for a colleague/supervisor/friend, instead of copy-pasting code into the body of an email (we’ve all been there), try writing the question into a short, reproducible .Rmd, knit it to .html, and attach both. That way, your questionee has a well ordered, documented basis for your question, and, crucially, reproducible code.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;If you’re doing a long, complicated piece of data analysis, try using a .Rmd file as the basis, instead of a regular .R script. That way, you will be encouraged to leave a much more detailed explanation for your future self, and as a bonus, you can knit it and you’ll have a pretty professional looking document to share with others who might be interested. If the code isn’t reproducible (say, for example, if you have locally stored data that’s read in to kick things off) it’s also not the end of the world — when you knit it locally, it’s all rendered to .html, and your reader can still see what the intermediate steps and outputs look like.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div id=&#34;start-using-rstudios-projects-feature&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;2. Start using RStudio’s &lt;em&gt;Projects&lt;/em&gt; feature&lt;/h1&gt;
+&lt;p&gt;I also came to this pretty late — in fact, I only really started doing it in order to facilitate step 3 (Git), for which it’s a pre-requisite. That was a mistake — there’s no single tool in RStudio which can help smooth out your workflow more than Projects. In technical terms, by creating a project in the RStudio IDE, you create a .Rproj file (and a bunch of others) in a given project directory. What this means in the real world is that, when you’re working on that project, R treats the base directory of that project as your working directory. If you still start all your scripts with &lt;code&gt;setwd(&#34;some/long/ass/path/to/my/working/directory&#34;)&lt;/code&gt;, you need to start using Projects. There are a number of other advantages (e.g. working on multiple projects at once, or zipping your project file and sending it to someone), but the &lt;code&gt;wd&lt;/code&gt; thing is definitely the easy win here.&lt;/p&gt;
+&lt;p&gt;It’s also one of the most intuitive steps in this post — so much so that I realise I’ve never actually read the RStudio Projects documentation, which is &lt;a href=&#34;https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects&#34;&gt;here&lt;/a&gt; as it turns out.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;install-git-and-make-an-account-on-github&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;3. Install Git and make an account on &lt;a href=&#34;https://www.github.com&#34;&gt;GitHub&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;I actually did this before I started doing any of part 1, and only did part 2 in order to make this happen. In retrospect, that’s topsy-turvy, but (having gone once too often for R help to the inimitable and Git-evangelical &lt;a href=&#34;http://mikerspencer.com&#34;&gt;Mike Spencer&lt;/a&gt;), I was persuaded of the merits of version control and, somewhere, found the energy to get myself up and running with Git. For solo coding, the best analogy I’ve heard for Git is that coding without it is like rock climbing without using protection. If (or really when) you mess up, you fall only as far as your last anchor (commit) with Git, or all the way to the ground without. And for collaborating on coding work, there really is no other way.&lt;/p&gt;
+&lt;p&gt;Version control can feel like a lot of extra effort for little gain when you start it. I think this is often because most people implement their own DIY-type version control (&lt;em&gt;script.R -&amp;gt; script-v2.R -&amp;gt; script-some-colleagues-initials.R -&amp;gt; script-final.R -&amp;gt; script-definitely-actually-final.R&lt;/em&gt; — look familiar?). Having made the move to Git, most do both initially. Once you realise the power and purpose of Git though, you can do away with the DIY stuff. It’s like having all of those versions wrapped up in one, but for multiple files, annotated with reasons for the changes, and with the ability to roll back to any version at any time.&lt;/p&gt;
+&lt;p&gt;Of all the steps here, this one is probably the most valuable and, probably, has the steepest learning curve. With that said, a combination of the inbuilt GUI-accessible tools in GitHub’s interface and in RStudio mean that you can get away without doing much, if anything, in the terminal — though it’s worth getting comfortable there too (I’m not especially — yet). Of all the materials and tutorials available on the web for this step, Jenny Bryan’s &lt;a href=&#34;https://happygitwithr.com&#34; class=&#34;uri&#34;&gt;https://happygitwithr.com&lt;/a&gt; is the best (and best-named) that I’ve yet found.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;get-your-references-into-a-.bib-and-start-using-it&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;4. Get your references into a .bib and start using it&lt;/h1&gt;
+&lt;p&gt;This stopped me from using R Markdown for my entire writing workflow for the &lt;em&gt;longest&lt;/em&gt; time. In retrospect, it’s quite funny that the final remaining thread of my attachment to Microsoft Word was the clunky, buggy add-in from another program altogether (Mendeley Desktop, my reference manager — if you’re not using a reference manager, seriously, why aren’t you using a reference manager?). It really shouldn’t have surprised me that there would be a neater solution in R Markdown (or any markdown language, come to that), but it took me a Covid lockdown and a week’s holiday to get around to tracking it down.&lt;/p&gt;
+&lt;p&gt;Most reference managers can create a .bib file for you — this basically contains all of the information for all the references in your library. Mendeley even automatically updates it with new additions. Save it somewhere memorable and easily accessed, and point to it in the YAML metadata at the top of your R Markdown scripts (and optionally, do the same with a .csl file to get your desired citation style). Then use citations keys in your text (something like &lt;code&gt;@Sykes2020&lt;/code&gt;), which will be rendered as proper citations, and your references section will be built automatically. Cute.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.rosannavanhespen.nl/2016/02/17/writing-your-thesis-with-r-markdown-2-text-citations-and-equations/&#34;&gt;This&lt;/a&gt; blog entry is where I started, and it’s really useful, though mistaken on one point — you don’t need your &lt;em&gt;library.bib&lt;/em&gt; file to be in the same folder as your .Rmd document, so long as you point to the filepath in the YAML header. A pretty comprehensive list of citation styles can be retrieved from &lt;a href=&#34;https://github.com/citation-style-language/styles&#34; class=&#34;uri&#34;&gt;https://github.com/citation-style-language/styles&lt;/a&gt;. I like &lt;em&gt;elsevier-harvard2.csl&lt;/em&gt;, as will you if you’re used to reading the usual environmental science journals.&lt;/p&gt;
+&lt;p&gt;Next time you write a report or paper manuscript, do it in R Markdown and avoid that sinking feeling when your project stakeholder or co-author asks you to change some fundamental assumption or parameter — if you link the .Rmd directly to your analysis, it’ll keep itself fully up-to-date with no more effort required.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;start-building-r-shiny-apps&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;5. Start building R Shiny apps&lt;/h1&gt;
+&lt;p&gt;I debated whether to add this step or not, since it’s more a cool addition to your workflow than anything more fundamental — there’s no real analogue for this in a non-code-based workflow. But Shiny apps are just about the best way there is to share the results of your work – and, if you’re an educator, they also make a really cool way to leverage the power of R without overburdening non-code-savvy students with the language itself. &lt;a href=&#34;https://www.github.com/aj-sykes92/msc-soil-c-modelling-tutorial&#34;&gt;This&lt;/a&gt; tutorial (with accompanying app) represents some of the most fun I’ve had teaching recently, and was well-received by students of differing R abilities. &lt;a href=&#34;https://alasdair-sykes.shinyapps.io/agroforestry-defra-prelim/&#34;&gt;This&lt;/a&gt; app took me a couple of days at the end of a recent project, and is currently in use by the UK government to inform GHG policy decisions.&lt;/p&gt;
+&lt;p&gt;A Shiny app can be written in a few lines of R code, and thanks to a lot of hard work by the team behind the &lt;code&gt;shiny&lt;/code&gt; package, they’re very intuitive to build and look like pro-level witchcraft to the uninitiated. Definitely a good level of return-on-investment for time spent learning. Get yourself a free account on &lt;a href=&#34;https://shinyapps.io&#34; class=&#34;uri&#34;&gt;https://shinyapps.io&lt;/a&gt; and anyone in the world with a web connection will be able to appreciate your genius (so long as they do so for less than 25 hours a month…). &lt;a href=&#34;https://shiny.rstudio.com/tutorial/&#34;&gt;This&lt;/a&gt; tutorial by Garrett Grolemund is as comprehensive an introduction as it gets, and comes with a suite of example apps.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;use-r-to-build-and-manage-your-professional-portfolio&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;6. Use R to build and manage your professional portfolio&lt;/h1&gt;
+&lt;p&gt;There’s no better way to convince a prospective employer of your coding chops than by making sure their introduction to your virtual self is via materials created in that coding language. I personally would put a lot more stock in reading a CV that’s written in R Markdown than in reading on that CV that the applicant once took a course in R.&lt;/p&gt;
+&lt;p&gt;With that in mind, the clever folks behind the &lt;code&gt;vitae&lt;/code&gt; package have made it dead easy for you to knock together a killer CV based on a .Rmd. You can even leverage other packages within it, letting you do cool stuff like use the &lt;code&gt;scholar&lt;/code&gt; package to retrieve your publications from Google Scholar and use the results to build the Publications section. &lt;a href=&#34;https://cran.r-project.org/web/packages/vitae/vignettes/vitae.html&#34;&gt;This&lt;/a&gt; is a pretty good introduction to &lt;code&gt;vitae&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Many folks also want to have a website these days, and it’s a great way to make sure that your personal profile exists outside of your current position or institution. If you already use R Markdown (and, ideally, GitHub), the &lt;code&gt;blogdown&lt;/code&gt; package, built around the Hugo framework, provides you with a simple way to build and maintain a personal website in R. This site is built with &lt;code&gt;blogdown&lt;/code&gt; and Hugo’s tranquilpeak template (find it &lt;a href=&#34;https://github.com/kakawait/hugo-tranquilpeak-theme/blob/master/docs/user.md&#34;&gt;here&lt;/a&gt;). The site is essentially a GitHub repository that deploys directly the the domain via &lt;a href=&#34;https://www.netlify.com&#34;&gt;Netlify&lt;/a&gt;. Blog posts are super easy to write in the RStudio IDE, and I have all of the advantages that come with writing in R Markdown and managing version control with Git.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;thats-all-folks&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;That’s all folks&lt;/h1&gt;
+&lt;p&gt;Hopefully that gives anyone who’s thinking of going cold-turkey on the MS Office-based workflow a few places to start. I’m by no means an expert and am definitely still fumbling my way through it; for example, I’ve yet to explore the &lt;code&gt;bookdown&lt;/code&gt; package for writing more complex documents with Markdown, so I’m looking forward to giving that a try. I always have the impression when I’m reading instructionals on this stuff that the writer got it all right first time, so I’ve tried — hopefully with some success — to avoid that here. Let me know if you have anything you’d add to this list, or anything you’d change. Cheers!&lt;/p&gt;
+&lt;/div&gt;
+</description>
     </item>
     
     <item>
@@ -26,8 +75,98 @@
       <pubDate>Tue, 28 Jul 2020 00:00:00 +0000</pubDate>
       
       <guid>/2020/07/web-and-pdf-scraping.en-us/</guid>
-      <description>I thought this would make as good a debut post as any for the new site. Here’s the challenge:
-My partner (the wonderful Aisha Josiah) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time.</description>
+      <description>
+
+
+&lt;p&gt;I thought this would make as good a debut post as any for the new site. Here’s the challenge:&lt;/p&gt;
+&lt;p&gt;My partner (the wonderful &lt;a href=&#34;https://www.aishajosiah.com&#34;&gt;Aisha Josiah&lt;/a&gt;) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time. As a result, we’ve used our subscriptions budget to sign up to &lt;a href=&#34;https://www.thegreatcoursesplus.com&#34;&gt;Great Courses Plus&lt;/a&gt;, which is essentially geeky version of Netflix, streaming lecture series instead of shows. I thoroughly recommend it, by the way.&lt;/p&gt;
+&lt;p&gt;Aisha’s predictably taking it a bit more seriously than I am. Recently, she became frustrated that, despite the quality of their courses, the Great Courses’ documentation and indexing of their offerings is incredibly poor, and consequently very difficult to search properly. It’s hard to tell why, but it seems like they’ve updated and re-packaged their offerings once too often, and with too little care for the searchability of their courses. A bit of digging revealed, however, that their entire collection of supplementary materials (.pdf files with transcripts and figures to accompany the lectures) is hosted freely on their site under a series of sequential numeric URL slugs; but crazily, there’s no definitive index page which contains entries for each. Aisha wanted to be able to see it all in one place, and to see at a glance the key attributes and metadata for each course — without typing hundreds of random URLs into a web browser. I took on the challenge, which became:&lt;/p&gt;
+&lt;ol class=&#34;example&#34; style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;Download the whole Great Courses supplementary materials collection (approximately 480 courses)&lt;/li&gt;
+&lt;li&gt;Extract relevant information from the title pages of the files&lt;/li&gt;
+&lt;li&gt;Write the files to a shared repository with informative, structured, searchable file names&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Quick disclaimer:&lt;/strong&gt; Opinions differ on the moral righteousness of web scraping, particularly in cases where it might be against the wishes of the host (&lt;a href=&#34;https://www.imperva.com/blog/is-web-scraping-illegal/&#34;&gt;this&lt;/a&gt; is quite an interesting discussion on that subject). Technically I guess this falls into the web scraping category since, while the files are in .pdf form, I’m retrieving them programmatically from a website. My conscience is clear on this one, since I’ve already got a paid-up subscription to the site in question, and the purpose of the scrape was to compensate for poor indexing by the host. Whether the lack of paywall on this material is an oversight or not is unclear, and so while you could (in theory) go get this material yourself, this blog post is &lt;strong&gt;in no way a suggestion that you do so&lt;/strong&gt;. To this end, I’ve anonomised the base URL in the relevant code block. If you still want to do it, a quick Google will, I’m sure, furnish you with the missing information and then it’s between you and your conscience. Ok — onwards.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;First job was to put together a vector of the relevant URLs — these were identical, save for the numeric suffix (000004 to 000486). &lt;code&gt;stringr&lt;/code&gt; (loaded with &lt;code&gt;tidyverse&lt;/code&gt;) is a great part of the toolbox for this sort of thing:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
+
+# create vector of url strings
+root &amp;lt;- &amp;quot;http://some.url/domain/slug_&amp;quot;
+
+number &amp;lt;- 4:486 %&amp;gt;%
+  as.character() %&amp;gt;%
+  str_pad(width = 6, side = &amp;quot;left&amp;quot;, pad = &amp;quot;0&amp;quot;)
+
+urls &amp;lt;- paste0(root, number, &amp;quot;.pdf&amp;quot;)
+
+print(urls[1:5])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;http://some.url/domain/slug_000004.pdf&amp;quot;
+## [2] &amp;quot;http://some.url/domain/slug_000005.pdf&amp;quot;
+## [3] &amp;quot;http://some.url/domain/slug_000006.pdf&amp;quot;
+## [4] &amp;quot;http://some.url/domain/slug_000007.pdf&amp;quot;
+## [5] &amp;quot;http://some.url/domain/slug_000008.pdf&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Side note. I’ve recently been making a concerted effort to move away from loops in &lt;code&gt;R&lt;/code&gt; programming. Arguably it’s a transition I should have made some time ago, but an ever-increasing need to make my coding more robust, easier to read and understand, and more computationally efficient has put the final nail in the coffin of the &lt;code&gt;for&lt;/code&gt; loop in my scripts. I’ve found functional programming and list-wise operations with &lt;code&gt;purrr&lt;/code&gt; fill this gap perfectly, and &lt;code&gt;purrr&lt;/code&gt; is much more intuitive to learn and use than the base &lt;code&gt;apply&lt;/code&gt; family of functions. Accordingly, while I have many &lt;code&gt;for&lt;/code&gt; loop-based scripts from previous web scrapes tucked away in various dusty filepaths, I started fresh with this one and worked list-wise instead.&lt;/p&gt;
+&lt;p&gt;The next job was to extract the data from the first page of a test-case document, and build a workflow that would convert the extracted text from the first page of a pdf into something short and informative, that could itself be built into a useful filepath.&lt;/p&gt;
+&lt;p&gt;First, we need to download a test case; this just uses a base &lt;code&gt;utils&lt;/code&gt; function.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# download a test pdf
+download.file(urls[1], destfile = &amp;quot;testfile.pdf&amp;quot;, mode = &amp;quot;wb&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here’s a snapshot of what that title page looks like:
+&lt;br&gt;&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;/post/2020-07-28-web-scraping-and-purrr.en-us_files/Screenshot%202020-08-03%20at%2009.22.06.png&#34; alt=&#34;&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;Great Courses example page header&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Now to load in &lt;code&gt;pdftools&lt;/code&gt; and extract the text itself.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(pdftools)
+testtext &amp;lt;- pdf_text(&amp;quot;testfile.pdf&amp;quot;)
+
+print(testtext[[1]])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;                          Topic   Subtopic\n                          History Medieval History\n1066\nCourse Guidebook\nProfessor Jennifer Paxton\nGeorgetown University\n&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;All the information is there, albeit in fairly difficult to read form. The following &lt;code&gt;stringr&lt;/code&gt; based function tidies it into a nice, neat filepath; it’s a bit piecemeal (I’m sure &lt;em&gt;regex&lt;/em&gt; afficionados can think of numerous ways to tidy/shorten it), but in the spirit of full disclosure, I haven’t altered or neatened it any from how I threw it together for its original purpose.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# function to build text into filepath
+build_filepath &amp;lt;- function(text){
+  filename &amp;lt;- text[[1]] %&amp;gt;%
+    str_to_lower() %&amp;gt;% # turn everything lowercase
+    str_replace_all(&amp;quot;subtopic&amp;quot;, &amp;quot;&amp;quot;) %&amp;gt;% # remove the word &amp;#39;subtopic&amp;#39;
+    str_replace_all(&amp;quot;topic&amp;quot;, &amp;quot;&amp;quot;) %&amp;gt;% # remove the word &amp;#39;topic&amp;#39;
+    str_replace_all(&amp;quot;course guidebook&amp;quot;, &amp;quot;&amp;quot;) %&amp;gt;% # remove the phrase &amp;#39;course guidebook&amp;#39;
+    str_replace_all(&amp;quot;\\W+&amp;quot;, &amp;quot;-&amp;quot;) %&amp;gt;% # replace all groups of non-word chars with a hyphen
+    str_replace_all(&amp;quot;^\\W+&amp;quot;, &amp;quot;&amp;quot;) %&amp;gt;% # remove non-word chars at start of string
+    str_replace_all(&amp;quot;\\W+$&amp;quot;, &amp;quot;.pdf&amp;quot;) # remove non-word chars at end of string and add &amp;#39;.pdf&amp;#39;.
+  
+  filepath &amp;lt;- paste0(&amp;quot;pdf-directory/&amp;quot;, filename)
+  
+  return(filepath)
+}
+
+# test function
+build_filepath(testtext)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;pdf-directory/history-medieval-history-1066-professor-jennifer-paxton-georgetown-university.pdf&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Lovely. The final flourish is to wrap that function in something which will download the relevant pdf from the URL:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# function to download pdf, save and rename
+scrape_pdf &amp;lt;- function(url){
+  
+  # download file
+  download.file(url, destfile = &amp;quot;temp.pdf&amp;quot;, mode = &amp;quot;wb&amp;quot;)
+  
+  # extract text
+  text &amp;lt;- pdf_text(&amp;quot;temp.pdf&amp;quot;)
+  
+  # resave
+  file.rename(&amp;quot;temp.pdf&amp;quot;, build_filepath(text))
+  
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that this function first saves the .pdf to a temporary location (&lt;em&gt;temp.pdf&lt;/em&gt; in the base project directory). From there, it extracts the text, parses it into a filename, and uses this to rename the file using another &lt;code&gt;utils&lt;/code&gt; function. Note also that the function itself doesn’t return anything, but rather works ‘behind-the-scenes’ directly from the relevant directory.&lt;/p&gt;
+&lt;p&gt;A little testing revealed a couple of things. Firstly, not all the URLs in my vector were valid — most were, but one or two returned 404 errors. Secondly, some ball-park benchmarking let me know that it would take about 45 minutes for my script to run on all 400+ URLs, with most of the time going into the download process. Without anything to tell it otherwise, any list-wise operations with this function would terminate at the first error, and I didn’t want to have to sit and watch it work for the duration.&lt;/p&gt;
+&lt;p&gt;This is typical of web scraping operations — they’re often lengthy, repetitive, and just different enough to fail occasionally. Trying to catch all the potential failure points in a loop is a real headache, and often takes several abortive attempts to fail-proof it. Fortunately, &lt;code&gt;purrr&lt;/code&gt; provides a rich suite of tools to modify how functions are applied over lists, and massively simplifies this task.&lt;/p&gt;
+&lt;p&gt;Here’s the syntax I ended up using:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# run function
+walk(urls, possibly(scrape_pdf, otherwise = NA))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;walk&lt;/code&gt; part here is an alternative to the more commonly-used &lt;code&gt;map&lt;/code&gt;; it’s useful since it triggers function side effects (i.e. all the behind-the-scenes stuff which is the sole purpose of this function) while returning the output invisibly. The &lt;code&gt;possibly&lt;/code&gt; modifier is even more useful, since it gives me an option of telling the function what to return if things go wrong, allowing it to carry on regardless. I also really like that this syntax reads pretty damn close to an English sentence (&lt;em&gt;walk&lt;/em&gt; the &lt;em&gt;urls&lt;/em&gt; and &lt;em&gt;possibly&lt;/em&gt; &lt;em&gt;scrape&lt;/em&gt; the &lt;em&gt;pdf&lt;/em&gt;, &lt;em&gt;otherwise&lt;/em&gt; return &lt;em&gt;NA&lt;/em&gt;). That’s in part due to &lt;code&gt;purrr&lt;/code&gt;’s good design, and in part down to the ability that a functional programming style brings to name your operations something sensible. Since most of us inevitably spend significantly more time reading code than writing it, that’s invaluable.&lt;/p&gt;
+&lt;p&gt;The story has a happy ending — Aisha is delighted with her well-indexed folder of course materials, and is working her way through it steadily and logically. And, pretty much on-brand for me, I more or less lost interest in the problem as soon as the coding bit was done, and have yet to actually look at any of them. I’ll get around to it sometime.&lt;/p&gt;
+</description>
     </item>
     
   </channel>

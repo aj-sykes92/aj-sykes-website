@@ -129,7 +129,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
   weight = 2
   identifier = "rbloggers"
   name = "R-Bloggers"
-  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-blog\"></i>"
+  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-link\"></i>"
   url = "https://www.r-bloggers.com/"
 
 [params]
