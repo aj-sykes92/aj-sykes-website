@@ -79,12 +79,6 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
   name = "Tags"
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-tags\"></i>"
   url = "/tags"
-#[[menu.main]]
-#  weight = 6
-#  identifier = "archives"
-#  name = "Archives"
-#  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-archive\"></i>"
-#  url = "/archives"
 
 [[menu.links]]
   weight = 1
@@ -124,13 +118,18 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
   name = "RSS"
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-rss\"></i>"
   url = "/index.xml"
-  
 [[menu.misc]]
-  weight = 2
-  identifier = "rbloggers"
+  weight = 1
+  identifier = "rblog"
   name = "R-Bloggers"
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-rss\"></i>"
   url = "https://www.r-bloggers.com/"
+[[menu.misc]]
+  weight = 1
+  identifier = "archives"
+  name = "Archives"
+  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-archive\"></i>"
+  url = "/archives"
 
 [params]
   # Customize date format use to render blog post date, categories and other
