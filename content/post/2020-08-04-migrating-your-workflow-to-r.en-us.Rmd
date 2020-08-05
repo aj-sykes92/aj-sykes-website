@@ -1,5 +1,5 @@
 ---
-title: Migrating your workflow to R — 6 easy(ish) steps?
+title: Migrating your workflow to R — 6 easy(ish) steps
 author: Alasdair Sykes
 date: '2020-08-04'
 slug: migrating-your-workflow-to-r.en-us
