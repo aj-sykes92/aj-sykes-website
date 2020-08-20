@@ -3,7 +3,7 @@ title: R community links
 author: Alasdair Sykes
 coverImage: images/cafe-racer.jpg
 date: '2020-08-09'
-slug: r-community-links
+slug: about-alasdair
 categories:
   - Links
 comments: no
@@ -17,4 +17,6 @@ At one stage I might have said my coding skills were self-taught --- but I would
 ### <https://www.rosannavanhespen.nl>
 ### <https://www.jumpingrivers.com/blog>
 
-![](/./useful-links_files/logo2.png){width=300px}
+<hr>
+
+![](/./about-alasdair_files/logo2.png){width=300px}

@@ -23,12 +23,32 @@ In the past, I’ve used spatial data as the building blocks for many of the mod
     
     <item>
       <title>R community links</title>
+      <link>/about-alasdair/</link>
+      <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/about-alasdair/</guid>
+      <description> At one stage I might have said my coding skills were self-taught — but I would strongly revise that to “community-taught” (credit to @EriPDev and @beeonaposy for introducing me to that phrasing in the context of R). In no particular order, here are the blogs of some folks that have helped me along the way:
+https://www.thedeltanomics.com  https://scottishsnow.wordpress.com  https://www.r-bloggers.com  https://www.rosannavanhespen.nl  https://www.jumpingrivers.com/blog   </description>
+    </item>
+    
+    <item>
+      <title>R community links</title>
       <link>/r-community-links/</link>
       <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
       
       <guid>/r-community-links/</guid>
       <description> At one stage I might have said my coding skills were self-taught — but I would strongly revise that to “community-taught” (credit to @EriPDev and @beeonaposy for introducing me to that phrasing in the context of R). In no particular order, here are the blogs of some folks that have helped me along the way:
 https://www.thedeltanomics.com  https://scottishsnow.wordpress.com  https://www.r-bloggers.com  https://www.rosannavanhespen.nl  https://www.jumpingrivers.com/blog  </description>
+    </item>
+    
+    <item>
+      <title>Shiny application showcase</title>
+      <link>/shiny-apps/</link>
+      <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/shiny-apps/</guid>
+      <description>Communicating environmental data science insights via Shiny applications is just about my favourite part of my job. Given the range of contexts and places in which I’m finding myself building apps, I wanted to maintain a page which keeps up-to-date links to the apps next to a record of the context in which they were built. Here they are:
+ July 2020 | A decision-support tool for agroforestry policymakers An add-on to an extended modelling project, this app provides an interactive user interface for some of the most interesting data science I’ve done in a while.</description>
     </item>
     
     <item>

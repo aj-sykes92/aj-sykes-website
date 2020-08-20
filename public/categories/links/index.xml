@@ -13,6 +13,16 @@
     
     <item>
       <title>R community links</title>
+      <link>/about-alasdair/</link>
+      <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/about-alasdair/</guid>
+      <description> At one stage I might have said my coding skills were self-taught — but I would strongly revise that to “community-taught” (credit to @EriPDev and @beeonaposy for introducing me to that phrasing in the context of R). In no particular order, here are the blogs of some folks that have helped me along the way:
+https://www.thedeltanomics.com  https://scottishsnow.wordpress.com  https://www.r-bloggers.com  https://www.rosannavanhespen.nl  https://www.jumpingrivers.com/blog   </description>
+    </item>
+    
+    <item>
+      <title>R community links</title>
       <link>/r-community-links/</link>
       <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
       
