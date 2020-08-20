@@ -1,7 +1,8 @@
 ---
 title: PDF scraping with pdftools and purrr
 author: Alasdair Sykes
-coverImage: /
+coverImage: images/cover-caferacer.jpg
+thumbnailImage: images/thumb-caferacer.jpg
 date: '2020-07-28'
 slug: web-and-pdf-scraping.en-us
 categories:
