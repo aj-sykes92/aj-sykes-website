@@ -113,23 +113,23 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 #  url = "https://artnclick.shootproof.com"
 
 [[menu.misc]]
-  weight = 1
+  weight = 3
   identifier = "rss"
   name = "RSS"
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-rss\"></i>"
   url = "/index.xml"
 [[menu.misc]]
-  weight = 1
-  identifier = "rblog"
-  name = "R-Bloggers"
-  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-link\"></i>"
-  url = "https://www.r-bloggers.com/"
-[[menu.misc]]
-  weight = 1
+  weight = 2
   identifier = "archives"
   name = "Archives"
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-archive\"></i>"
   url = "/archives"
+[[menu.misc]]
+  weight = 1
+  identifier = "links"
+  name = "Links"
+  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-link\"></i>"
+  url = "/r-community-links"
 
 [params]
   # Customize date format use to render blog post date, categories and other
@@ -231,10 +231,10 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     icon = "fa-twitter"
     url = "https://twitter.com/intent/tweet?text=%s"
 
-  [[params.sharingOptions]]
-    name = "Google+"
-    icon = "fa-google-plus"
-    url = "https://plus.google.com/share?url=%s"
+  #[[params.sharingOptions]]
+  #  name = "Google+"
+  #  icon = "fa-google-plus"
+  #  url = "https://plus.google.com/share?url=%s"
 
   [params.header.rightLink]
     class = ""

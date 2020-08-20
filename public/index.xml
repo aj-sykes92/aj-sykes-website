@@ -22,6 +22,16 @@ In the past, I’ve used spatial data as the building blocks for many of the mod
     </item>
     
     <item>
+      <title>R community links</title>
+      <link>/r-community-links/</link>
+      <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/r-community-links/</guid>
+      <description> At one stage I might have said my coding skills were self-taught — but I would strongly revise that to “community-taught” (credit to @EriPDev and @beeonaposy for introducing me to that phrasing in the context of R). In no particular order, here are the blogs of some folks that have helped me along the way:
+https://www.thedeltanomics.com  https://scottishsnow.wordpress.com  https://www.r-bloggers.com  https://www.rosannavanhespen.nl  https://www.jumpingrivers.com/blog  </description>
+    </item>
+    
+    <item>
       <title>Migrating your workflow to R — 6 easy(ish) steps</title>
       <link>/2020/08/migrating-your-workflow-to-r.en-us/</link>
       <pubDate>Tue, 04 Aug 2020 00:00:00 +0000</pubDate>

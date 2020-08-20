@@ -1,0 +1,21 @@
+---
+title: R community links
+author: Alasdair Sykes
+coverImage: images/cafe-racer.jpg
+date: '2020-08-09'
+slug: r-community-links
+categories:
+  - Links
+comments: no
+clearReading: true
+---
+
+At one stage I might have said my coding skills were self-taught --- but I would strongly revise that to "community-taught" (credit to [\@EriPDev](https://twitter.com/EriPDev) and [\@beeonaposy](https://twitter.com/beeonaposy) for introducing me to that phrasing in the context of R). In no particular order, here are the blogs of some folks that have helped me along the way:
+
+### <https://www.thedeltanomics.com>
+### <https://scottishsnow.wordpress.com>
+### <https://www.r-bloggers.com>
+### <https://www.rosannavanhespen.nl>
+### <https://www.jumpingrivers.com/blog>
+
+![](/./useful-links_files/logo2.png){width=300px}

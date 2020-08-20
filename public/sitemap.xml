@@ -28,6 +28,11 @@
   </url>
   
   <url>
+    <loc>/categories/links/</loc>
+    <lastmod>2020-08-09T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2020/08/making-an-api-call-with-r.en-us/</loc>
     <lastmod>2020-08-09T00:00:00+00:00</lastmod>
   </url>
@@ -39,6 +44,11 @@
   
   <url>
     <loc>/categories/r/</loc>
+    <lastmod>2020-08-09T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/r-community-links/</loc>
     <lastmod>2020-08-09T00:00:00+00:00</lastmod>
   </url>
   

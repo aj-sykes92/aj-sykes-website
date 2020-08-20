@@ -123,7 +123,7 @@ long_metric <- tibble(metric = c("avg_dni", "avg_ghi", "avg_lat_tilt"),
 
 output_df %>%
   mutate(date = lubridate::dmy(paste0("01-", month, "-14"))) %>%
-  left_join(long_metric) %>%
+  left_join(long_metric, by = "metric") %>%
   ggplot(aes(x = date, y = value, colour = long)) +
   scale_x_date(date_labels = "%b", date_breaks = "3 months") +
   labs(x = "",

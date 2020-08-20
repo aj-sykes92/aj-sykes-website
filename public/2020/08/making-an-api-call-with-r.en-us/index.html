@@ -252,21 +252,21 @@ if (!doNotTrack) {
       
   <li class="sidebar-button">
     
-      <a class="sidebar-button-link " href="/archives">
+      <a class="sidebar-button-link " href="/r-community-links">
     
-      <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+      <i class="sidebar-button-icon fa fa-lg fa-link"></i>
       
-      <span class="sidebar-button-desc">Archives</span>
+      <span class="sidebar-button-desc">Links</span>
     </a>
   </li>
 
   <li class="sidebar-button">
     
-      <a class="sidebar-button-link " href="https://www.r-bloggers.com/">
+      <a class="sidebar-button-link " href="/archives">
     
-      <i class="sidebar-button-icon fa fa-lg fa-link"></i>
+      <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
       
-      <span class="sidebar-button-desc">R-Bloggers</span>
+      <span class="sidebar-button-desc">Archives</span>
     </a>
   </li>
 
@@ -448,7 +448,7 @@ glimpse(output_df)</code></pre>
 
 output_df %&gt;%
   mutate(date = lubridate::dmy(paste0(&quot;01-&quot;, month, &quot;-14&quot;))) %&gt;%
-  left_join(long_metric) %&gt;%
+  left_join(long_metric, by = &quot;metric&quot;) %&gt;%
   ggplot(aes(x = date, y = value, colour = long)) +
   scale_x_date(date_labels = &quot;%b&quot;, date_breaks = &quot;3 months&quot;) +
   labs(x = &quot;&quot;,
@@ -458,7 +458,6 @@ output_df %&gt;%
        subtitle = paste0(&quot;lat = &quot;, lat, &quot;, lon = &quot;, lon)) +
   geom_line() +
   theme_classic()</code></pre>
-<pre><code>## Joining, by = &quot;metric&quot;</code></pre>
 <p><img src="/post/2020-08-09-making-an-api-call-with-r.en-us_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>Thanks for reading!</p>
 
@@ -526,12 +525,6 @@ output_df %&gt;%
           <li class="post-action hide-xs">
             <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=/2020/08/making-an-api-call-with-r.en-us/">
               <i class="fa fa-twitter"></i>
-            </a>
-          </li>
-        
-          <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=/2020/08/making-an-api-call-with-r.en-us/">
-              <i class="fa fa-google-plus"></i>
             </a>
           </li>
         
@@ -615,12 +608,6 @@ output_df %&gt;%
             </a>
           </li>
         
-          <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=/2020/08/making-an-api-call-with-r.en-us/">
-              <i class="fa fa-google-plus"></i>
-            </a>
-          </li>
-        
       
       
         <li class="post-action">
@@ -654,12 +641,6 @@ output_df %&gt;%
       <li class="share-option">
         <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=%2F2020%2F08%2Fmaking-an-api-call-with-r.en-us%2F">
           <i class="fa fa-twitter"></i><span>Share on Twitter</span>
-        </a>
-      </li>
-    
-      <li class="share-option">
-        <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=%2F2020%2F08%2Fmaking-an-api-call-with-r.en-us%2F">
-          <i class="fa fa-google-plus"></i><span>Share on Google&#43;</span>
         </a>
       </li>
     
