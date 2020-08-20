@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>API on Alasdair Sykes</title>
+    <link>/tags/api/</link>
+    <description>Recent content in API on Alasdair Sykes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 09 Aug 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/api/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Making an API call with R</title>
+      <link>/2020/08/making-an-api-call-with-r.en-us/</link>
+      <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/08/making-an-api-call-with-r.en-us/</guid>
+      <description>A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential — I’ll be posting plenty about that when it’s more mature — but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.
+In the past, I’ve used spatial data as the building blocks for many of the models I build, and its especially pertinent for solar-based models.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -38,5 +38,6 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-# untracked folder
+# untracked folders
 untracked/
+content/post/private/

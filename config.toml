@@ -18,7 +18,7 @@ defaultContentLanguage = "en-us"
 title = "Alasdair Sykes"
 theme = "hugo-tranquilpeak-theme"
 disqusShortname = "alasdairsykes"
-# googleAnalytics = "UA-123-45"
+googleAnalytics = "UA-174945806-1"
 paginate = 7
 canonifyurls = true
 

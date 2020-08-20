@@ -1,0 +1,144 @@
+---
+title: Making an API call with R
+author: Alasdair Sykes
+date: '2020-08-09'
+slug: making-an-api-call-with-r.en-us
+coverImage: /
+categories:
+  - R
+tags:
+  - API
+  - tidyverse
+  - httr
+  - jsonlite
+keywords:
+  - tech
+---
+
+
+
+<p>A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential — I’ll be posting plenty about that when it’s more mature — but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.</p>
+<p>In the past, I’ve used spatial data as the building blocks for many of the models I build, and its especially pertinent for solar-based models. For example, a spatially specific estimate of solar irradiation is pretty indispensible when it comes to making supportable estimates for the performance of solar tech. For the solar app, I want the user to be able to specify their location and receive output data specific to their local climatic conditions.</p>
+<p>The easy solution for the app would be just to wrap up some raster data in .rds form and add it into the directory. However, that seems inelegant; apart from adding some fairly chunky files to the app bundle (think global coverage * 2–3 layers * 30-arc-second resolution * 12 months), it also means these have to be read in and out every time the app is loaded, slowing things down quite a bit. Inevitably, I’d end up making compromises — lower resolution for faster performance, skip a layer to avoid going over bundle size limits, etc.</p>
+<p>After a bit of head-scratching and searching, I discovered the National Renewable Energy Laboratory’s <a href="https://developer.nrel.gov/docs/solar/solar-resource-v1/">Developer Network</a>. NREL’s DN domain hosts a free application programming interface (API) allowing the user to query and retrieve solar-relevant data.</p>
+<p>Before starting, it’s worth noting that many APIs have R packages built around them, making their use very straightforward — the <code>rtweet</code> package is a mature (and very cool) example. Full disclosure here — I was originally going to do this blog post for the UK postcodes API hosted at <a href="http://api.postcodes.io/postcodes/" class="uri">http://api.postcodes.io/postcodes/</a> (also used in my app), and got fully halfway into it before realising that there’s already an R package built for this, documented <a href="http://walczak.org/2016/07/postcode-and-geolocation-api-for-the-uk/">here</a>. While the NREL API doesn’t have its own R package, all’s not lost — as it turns out, it’s very straightforward to knock together your own call. We’re going to use the <code>httr</code> and <code>jsonlite</code> packages to pull the call together.</p>
+<p>Based on documentation from the <a href="https://developer.nrel.gov/docs/solar/solar-resource-v1/">API homepage</a>, we can see that the URL required for the API takes this format:</p>
+<p><code>https://developer.nrel.gov/api/solar/solar_resource/v1.json?api_key=DEMO_KEY&amp;lat=40&amp;lon=-105</code></p>
+<p>Breaking that down, the parts of interest are <code>.json</code>, indicating the file return format (.xml is also an option, but with <code>jsonlite</code> available, .json is definitely my preference), <code>api_key=DEMO_KEY</code>, giving me space for authentication, and the <code>lat</code>/<code>lon</code> entries, giving me space to supply my query data.</p>
+<blockquote>
+<p><strong>Note:</strong> To dissuade the internet from borrowing my API key (though it’s free to get — signup is <a href="https://developer.nrel.gov/signup/">here</a>), I’ve built a function which returns the key in a separate (non-tracked script), and I source that first before building. Here’s what that code looks like:</p>
+</blockquote>
+<pre class="r"><code># example function
+api_key &lt;- function() return(&quot;some_api_key&quot;)
+
+# overwrite with function returning actual key
+source(&quot;private/nrel-api-key.R&quot;)</code></pre>
+<p>That done, here’s a simple <code>paste0</code> based method to knock that call together. I’m not quite ready to tell the internet where I live, so I’m going to use the example lat/lon documented on the NREL developer page, which looks to be just north of Denver, Colorado, USA.</p>
+<pre class="r"><code>base &lt;- &quot;https://developer.nrel.gov/api/solar/solar_resource/v1.json?api_key=&quot;
+lat &lt;- 40
+lon &lt;- -105
+loc &lt;- paste0(&quot;&amp;lat=&quot;, lat, &quot;&amp;lon=&quot;, lon)
+
+api_call &lt;- paste0(base, api_key(), loc)</code></pre>
+<p>Now we’ll use <code>GET</code> and <code>content</code> from the <code>httr</code> package to make and interpret the call:</p>
+<pre class="r"><code># make call
+result &lt;- httr::GET(api_call)
+
+# extract text
+result_text &lt;- httr::content(result, as = &quot;text&quot;)
+
+print(result_text)</code></pre>
+<pre><code>## [1] &quot;{\&quot;version\&quot;:\&quot;1.0.0\&quot;,\&quot;warnings\&quot;:[],\&quot;errors\&quot;:[],\&quot;metadata\&quot;:{\&quot;sources\&quot;:[\&quot;Perez-SUNY/NREL, 2012\&quot;]},\&quot;inputs\&quot;:{\&quot;lat\&quot;:\&quot;40\&quot;,\&quot;lon\&quot;:\&quot;-105\&quot;},\&quot;outputs\&quot;:{\&quot;avg_dni\&quot;:{\&quot;annual\&quot;:6.06,\&quot;monthly\&quot;:{\&quot;jan\&quot;:5.0,\&quot;feb\&quot;:5.34,\&quot;mar\&quot;:5.94,\&quot;apr\&quot;:6.11,\&quot;may\&quot;:6.36,\&quot;jun\&quot;:7.43,\&quot;jul\&quot;:7.48,\&quot;aug\&quot;:6.65,\&quot;sep\&quot;:6.81,\&quot;oct\&quot;:5.82,\&quot;nov\&quot;:5.11,\&quot;dec\&quot;:4.67}},\&quot;avg_ghi\&quot;:{\&quot;annual\&quot;:4.81,\&quot;monthly\&quot;:{\&quot;jan\&quot;:2.5,\&quot;feb\&quot;:3.43,\&quot;mar\&quot;:4.69,\&quot;apr\&quot;:5.69,\&quot;may\&quot;:6.6,\&quot;jun\&quot;:7.25,\&quot;jul\&quot;:7.14,\&quot;aug\&quot;:6.24,\&quot;sep\&quot;:5.35,\&quot;oct\&quot;:3.85,\&quot;nov\&quot;:2.75,\&quot;dec\&quot;:2.19}},\&quot;avg_lat_tilt\&quot;:{\&quot;annual\&quot;:5.82,\&quot;monthly\&quot;:{\&quot;jan\&quot;:4.79,\&quot;feb\&quot;:5.4,\&quot;mar\&quot;:6.07,\&quot;apr\&quot;:6.11,\&quot;may\&quot;:6.25,\&quot;jun\&quot;:6.47,\&quot;jul\&quot;:6.58,\&quot;aug\&quot;:6.44,\&quot;sep\&quot;:6.53,\&quot;oct\&quot;:5.71,\&quot;nov\&quot;:4.99,\&quot;dec\&quot;:4.47}}}}&quot;</code></pre>
+<p>Looks like we’ve got something there, but it’s not very helpfully structured. If you were to paste that into a text file and save it with the .json extension, a text editor which recognises the filetype would format it much more nicely for you. However, we’re interested in getting the data in usable form, so it’s time to bring in <code>jsonlite</code>:</p>
+<pre class="r"><code># convert from .json to list
+result_list &lt;- jsonlite::fromJSON(result_text, flatten = TRUE)
+
+# main results list structure
+names(result_list)</code></pre>
+<pre><code>## [1] &quot;version&quot;  &quot;warnings&quot; &quot;errors&quot;   &quot;metadata&quot; &quot;inputs&quot;   &quot;outputs&quot;</code></pre>
+<pre class="r"><code># let&#39;s see what we&#39;ve got for outputs
+str(result_list$outputs)</code></pre>
+<pre><code>## List of 3
+##  $ avg_dni     :List of 2
+##   ..$ annual : num 6.06
+##   ..$ monthly:List of 12
+##   .. ..$ jan: num 5
+##   .. ..$ feb: num 5.34
+##   .. ..$ mar: num 5.94
+##   .. ..$ apr: num 6.11
+##   .. ..$ may: num 6.36
+##   .. ..$ jun: num 7.43
+##   .. ..$ jul: num 7.48
+##   .. ..$ aug: num 6.65
+##   .. ..$ sep: num 6.81
+##   .. ..$ oct: num 5.82
+##   .. ..$ nov: num 5.11
+##   .. ..$ dec: num 4.67
+##  $ avg_ghi     :List of 2
+##   ..$ annual : num 4.81
+##   ..$ monthly:List of 12
+##   .. ..$ jan: num 2.5
+##   .. ..$ feb: num 3.43
+##   .. ..$ mar: num 4.69
+##   .. ..$ apr: num 5.69
+##   .. ..$ may: num 6.6
+##   .. ..$ jun: num 7.25
+##   .. ..$ jul: num 7.14
+##   .. ..$ aug: num 6.24
+##   .. ..$ sep: num 5.35
+##   .. ..$ oct: num 3.85
+##   .. ..$ nov: num 2.75
+##   .. ..$ dec: num 2.19
+##  $ avg_lat_tilt:List of 2
+##   ..$ annual : num 5.82
+##   ..$ monthly:List of 12
+##   .. ..$ jan: num 4.79
+##   .. ..$ feb: num 5.4
+##   .. ..$ mar: num 6.07
+##   .. ..$ apr: num 6.11
+##   .. ..$ may: num 6.25
+##   .. ..$ jun: num 6.47
+##   .. ..$ jul: num 6.58
+##   .. ..$ aug: num 6.44
+##   .. ..$ sep: num 6.53
+##   .. ..$ oct: num 5.71
+##   .. ..$ nov: num 4.99
+##   .. ..$ dec: num 4.47</code></pre>
+<p>Very nice, and a lot more usable than the raw .json. As a final flourish, let’s use a bit of <code>dplyr</code> and <code>purrr</code> to wrangle that list into a nice tidy dataframe (I’m just going to load the full <code>tidyverse</code> here since I’m lazy).</p>
+<pre class="r"><code>library(tidyverse)
+
+# extract outputs
+output &lt;- result_list$output
+
+# convert list output field to tidy df
+output_df &lt;- output %&gt;%
+  map_dfr(~.x$monthly) %&gt;% # return row-wise data frame bind
+  mutate(metric = names(output)) %&gt;% # add names
+  gather(-metric, key = &quot;month&quot;, value = &quot;value&quot;)
+
+glimpse(output_df)</code></pre>
+<pre><code>## Rows: 36
+## Columns: 3
+## $ metric &lt;chr&gt; &quot;avg_dni&quot;, &quot;avg_ghi&quot;, &quot;avg_lat_tilt&quot;, &quot;avg_dni&quot;, &quot;avg_ghi&quot;, &quot;a…
+## $ month  &lt;chr&gt; &quot;jan&quot;, &quot;jan&quot;, &quot;jan&quot;, &quot;feb&quot;, &quot;feb&quot;, &quot;feb&quot;, &quot;mar&quot;, &quot;mar&quot;, &quot;mar&quot;,…
+## $ value  &lt;dbl&gt; 5.00, 2.50, 4.79, 5.34, 3.43, 5.40, 5.94, 4.69, 6.07, 6.11, 5.…</code></pre>
+<p>That about does it. This has been a code-heavy and visualisation-light post, so let’s finish on a plot for style points.</p>
+<pre class="r"><code>long_metric &lt;- tibble(metric = c(&quot;avg_dni&quot;, &quot;avg_ghi&quot;, &quot;avg_lat_tilt&quot;),
+                      long = c(&quot;Direct normal irradiation&quot;,
+                               &quot;Global horizontal irradiation&quot;,
+                               &quot;Average tilt at latitude&quot;))
+
+output_df %&gt;%
+  mutate(date = lubridate::dmy(paste0(&quot;15-&quot;, month, &quot;-14&quot;))) %&gt;%
+  left_join(long_metric) %&gt;%
+  ggplot(aes(x = date, y = value, colour = long)) +
+  scale_x_date(date_labels = &quot;%b&quot;) +
+  labs(x = &quot;&quot;,
+       y = &quot;Value&quot;,
+       colour = expression(&quot;Solar\ninsolation\n(kWh m&quot;^{-2}*&quot; day&quot;^{-1}*&quot;)&quot;),
+       title = paste0(&quot;Monthly solar insolation data for lat &quot;, lat, &quot;, lon &quot;, lon)) +
+  geom_line() +
+  theme_classic()</code></pre>
+<pre><code>## Joining, by = &quot;metric&quot;</code></pre>
+<p><img src="/post/2020-08-09-making-an-api-call-with-r.en-us_files/figure-html/unnamed-chunk-7-1.png" width="672" />
+Cheers!</p>

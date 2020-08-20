@@ -1,0 +1,135 @@
+---
+title: Making an API call with R
+author: Alasdair Sykes
+date: '2020-08-09'
+slug: making-an-api-call-with-r.en-us
+coverImage: /
+categories:
+  - R
+tags:
+  - API
+  - tidyverse
+  - httr
+  - jsonlite
+keywords:
+  - tech
+---
+
+```{r include = F}
+hook_output <- knitr::knit_hooks$get("output")
+
+# set a new output hook to truncate text output
+knitr::knit_hooks$set(output = function(x, options) {
+  if (!is.null(n <- options$out.lines)) {
+    x <- xfun::split_lines(x)
+    if (length(x) > n) {
+      # truncate the output
+      x <- c(head(x, n), "....\n")
+    }
+    x <- paste(x, collapse = "\n")
+  }
+  hook_output(x, options)
+})
+```
+
+A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential --- I'll be posting plenty about that when it's more mature --- but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.
+
+In the past, I've used spatial data as the building blocks for many of the models I build, and its especially pertinent for solar-based models. For example, a spatially specific estimate of solar irradiation is pretty indispensible when it comes to making supportable estimates for the performance of solar tech. For the solar app, I want the user to be able to specify their location and receive output data specific to their local climatic conditions.
+
+The easy solution for the app would be just to wrap up some raster data in .rds form and add it into the directory. However, that seems inelegant; apart from adding some fairly chunky files to the app bundle (think global coverage * 2--3 layers * 30-arc-second resolution * 12 months), it also means these have to be read in and out every time the app is loaded, slowing things down quite a bit. Inevitably, I'd end up making compromises --- lower resolution for faster performance, skip a layer to avoid going over bundle size limits, etc.
+
+After a bit of head-scratching and searching, I discovered the National Renewable Energy Laboratory's [Developer Network](https://developer.nrel.gov/docs/solar/solar-resource-v1/). NREL's DN domain hosts a free application programming interface (API) allowing the user to query and retrieve solar-relevant data.
+
+Before starting, it's worth noting that many APIs have R packages built around them, making their use very straightforward --- the `rtweet` package is a mature (and very cool) example. Full disclosure here --- I was originally going to do this blog post for the UK postcodes API hosted at <http://api.postcodes.io/postcodes/> (also used in my app), and got fully halfway into it before realising that there's already an R package built for this, documented [here](http://walczak.org/2016/07/postcode-and-geolocation-api-for-the-uk/). While the NREL API doesn't have its own R package, all's not lost --- as it turns out, it's very straightforward to knock together your own call. We're going to use the `httr` and `jsonlite` packages to pull the call together.
+
+Based on documentation from the [API homepage](https://developer.nrel.gov/docs/solar/solar-resource-v1/), we can see that the URL required for the API takes this format:
+
+`https://developer.nrel.gov/api/solar/solar_resource/v1.json?api_key=DEMO_KEY&lat=40&lon=-105`
+
+Breaking that down, the parts of interest are `.json`, indicating the file return format (.xml is also an option, but with `jsonlite` available, .json is definitely my preference), `api_key=DEMO_KEY`, giving me space for authentication, and the `lat`/`lon` entries, giving me space to supply my query data.
+
+> **Note:** To dissuade the internet from borrowing my API key (though it's free to get --- signup is [here](https://developer.nrel.gov/signup/)), I've built a function which returns the key in a separate (non-tracked script), and I source that first before building. Here's what that code looks like:
+
+```{r}
+# example function
+api_key <- function() return("some_api_key")
+
+# overwrite with function returning actual key
+source("private/nrel-api-key.R")
+```
+
+That done, here's a simple `paste0` based method to knock that call together. I'm not quite ready to tell the internet where I live, so I'm going to use the example lat/lon documented on the NREL developer page, which looks to be just north of Denver, Colorado, USA.
+
+```{r}
+base <- "https://developer.nrel.gov/api/solar/solar_resource/v1.json?api_key="
+lat <- 40
+lon <- -105
+loc <- paste0("&lat=", lat, "&lon=", lon)
+
+api_call <- paste0(base, api_key(), loc)
+```
+
+Now we'll use `GET` and `content` from the `httr` package to make and interpret the call:
+
+```{r message = F}
+# make call
+result <- httr::GET(api_call)
+
+# extract text
+result_text <- httr::content(result, as = "text")
+
+print(result_text)
+```
+
+Looks like we've got something there, but it's not very helpfully structured. If you were to paste that into a text file and save it with the .json extension, a text editor which recognises the filetype would format it much more nicely for you. However, we're interested in getting the data in usable form, so it's time to bring in `jsonlite`:
+
+```{r}
+# convert from .json to list
+result_list <- jsonlite::fromJSON(result_text, flatten = TRUE)
+
+# main results list structure
+names(result_list)
+
+# let's see what we've got for outputs
+str(result_list$outputs)
+```
+
+Very nice, and a lot more usable than the raw .json. As a final flourish, let's use a bit of `dplyr` and `purrr` to wrangle that list into a nice tidy dataframe (I'm just going to load the full `tidyverse` here since I'm lazy).
+
+```{r message = F}
+library(tidyverse)
+
+# extract outputs
+output <- result_list$output
+
+# convert list output field to tidy df
+output_df <- output %>%
+  map_dfr(~.x$monthly) %>% # return row-wise data frame bind
+  mutate(metric = names(output)) %>% # add names
+  gather(-metric, key = "month", value = "value")
+
+glimpse(output_df)
+```
+
+That about does it. This has been a code-heavy and visualisation-light post, so let's finish on a plot for style points.
+
+```{r}
+
+long_metric <- tibble(metric = c("avg_dni", "avg_ghi", "avg_lat_tilt"),
+                      long = c("Direct normal irradiation",
+                               "Global horizontal irradiation",
+                               "Average tilt at latitude"))
+
+output_df %>%
+  mutate(date = lubridate::dmy(paste0("15-", month, "-14"))) %>%
+  left_join(long_metric) %>%
+  ggplot(aes(x = date, y = value, colour = long)) +
+  scale_x_date(date_labels = "%b") +
+  labs(x = "",
+       y = "Value",
+       colour = expression("Solar\ninsolation\n(kWh m"^{-2}*" day"^{-1}*")"),
+       title = paste0("Monthly solar insolation data for lat ", lat, ", lon ", lon)) +
+  geom_line() +
+  theme_classic()
+```
+Cheers!
