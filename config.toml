@@ -76,7 +76,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 [[menu.main]]
   weight = 4
   identifier = "shiny"
-  name = "Shiny Apps"
+  name = "Shiny"
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-code\"></i>"
   url = "/shiny-apps"
 
