@@ -9,11 +9,11 @@
 <meta name="author" content="Alasdair Sykes PhD">
 <meta name="keywords" content="purrr, tidyverse, pdf scrape, natural language processing, web scrape, Great Courses">
 <meta name="description" content="I thought this would make as good a debut post as any for the new site. Here’s the challenge:
-My partner (the wonderful Aisha Josiah) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time.">
+My partner is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time. As a result, we’ve used our subscriptions budget to sign up to Great Courses Plus, which is essentially geeky version of Netflix, streaming lecture series instead of shows.">
 
 
 <meta property="og:description" content="I thought this would make as good a debut post as any for the new site. Here’s the challenge:
-My partner (the wonderful Aisha Josiah) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time.">
+My partner is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time. As a result, we’ve used our subscriptions budget to sign up to Great Courses Plus, which is essentially geeky version of Netflix, streaming lecture series instead of shows.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PDF scraping with pdftools and purrr">
 <meta name="twitter:title" content="PDF scraping with pdftools and purrr">
@@ -21,9 +21,9 @@ My partner (the wonderful Aisha Josiah) is, like many of us, taking the extended
 <meta property="twitter:url" content="/2020/07/web-and-pdf-scraping.en-us/">
 <meta property="og:site_name" content="Alasdair Sykes">
 <meta property="og:description" content="I thought this would make as good a debut post as any for the new site. Here’s the challenge:
-My partner (the wonderful Aisha Josiah) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time.">
+My partner is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time. As a result, we’ve used our subscriptions budget to sign up to Great Courses Plus, which is essentially geeky version of Netflix, streaming lecture series instead of shows.">
 <meta name="twitter:description" content="I thought this would make as good a debut post as any for the new site. Here’s the challenge:
-My partner (the wonderful Aisha Josiah) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time.">
+My partner is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time. As a result, we’ve used our subscriptions budget to sign up to Great Courses Plus, which is essentially geeky version of Netflix, streaming lecture series instead of shows.">
 <meta property="og:locale" content="en-us">
 
   
@@ -342,7 +342,7 @@ if (!doNotTrack) {
 
 
 <p>I thought this would make as good a debut post as any for the new site. Here’s the challenge:</p>
-<p>My partner (the wonderful <a href="https://www.aishajosiah.com">Aisha Josiah</a>) is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time. As a result, we’ve used our subscriptions budget to sign up to <a href="https://www.thegreatcoursesplus.com">Great Courses Plus</a>, which is essentially geeky version of Netflix, streaming lecture series instead of shows. I thoroughly recommend it, by the way.</p>
+<p>My partner is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time. As a result, we’ve used our subscriptions budget to sign up to <a href="https://www.thegreatcoursesplus.com">Great Courses Plus</a>, which is essentially geeky version of Netflix, streaming lecture series instead of shows. I thoroughly recommend it, by the way.</p>
 <p>Aisha’s predictably taking it a bit more seriously than I am. Recently, she became frustrated that, despite the quality of their courses, the Great Courses’ documentation and indexing of their offerings is incredibly poor, and consequently very difficult to search properly. It’s hard to tell why, but it seems like they’ve updated and re-packaged their offerings once too often, and with too little care for the searchability of their courses. A bit of digging revealed, however, that their entire collection of supplementary materials (.pdf files with transcripts and figures to accompany the lectures) is hosted freely on their site under a series of sequential numeric URL slugs; but crazily, there’s no definitive index page which contains entries for each. Aisha wanted to be able to see it all in one place, and to see at a glance the key attributes and metadata for each course — without typing hundreds of random URLs into a web browser. I took on the challenge, which became:</p>
 <ol class="example" style="list-style-type: decimal">
 <li>Download the whole Great Courses supplementary materials collection (approximately 480 courses)</li>
