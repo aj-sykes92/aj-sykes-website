@@ -132,7 +132,8 @@ output_df %>%
        title = "Monthly solar insolation",
        subtitle = paste0("lat = ", lat, ", lon = ", lon)) +
   geom_line() +
-  theme_classic()
+  theme_classic() +
+  theme(legend.position = "bottom")
 ```
 
 Thanks for reading!
