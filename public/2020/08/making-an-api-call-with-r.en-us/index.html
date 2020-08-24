@@ -9,11 +9,11 @@
 <meta name="author" content="Alasdair Sykes PhD">
 <meta name="keywords" content="tech">
 <meta name="description" content="A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential — I’ll be posting plenty about that when it’s more mature — but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.
-In the past, I’ve used spatial data as the building blocks for many of the models I build, and its especially pertinent for solar-based models.">
+In the past, I’ve used spatial data as the building blocks for many of the models I build, and it’s especially pertinent for solar-based models.">
 
 
 <meta property="og:description" content="A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential — I’ll be posting plenty about that when it’s more mature — but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.
-In the past, I’ve used spatial data as the building blocks for many of the models I build, and its especially pertinent for solar-based models.">
+In the past, I’ve used spatial data as the building blocks for many of the models I build, and it’s especially pertinent for solar-based models.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Making an API call with R">
 <meta name="twitter:title" content="Making an API call with R">
@@ -21,9 +21,9 @@ In the past, I’ve used spatial data as the building blocks for many of the mod
 <meta property="twitter:url" content="/2020/08/making-an-api-call-with-r.en-us/">
 <meta property="og:site_name" content="Alasdair Sykes">
 <meta property="og:description" content="A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential — I’ll be posting plenty about that when it’s more mature — but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.
-In the past, I’ve used spatial data as the building blocks for many of the models I build, and its especially pertinent for solar-based models.">
+In the past, I’ve used spatial data as the building blocks for many of the models I build, and it’s especially pertinent for solar-based models.">
 <meta name="twitter:description" content="A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential — I’ll be posting plenty about that when it’s more mature — but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.
-In the past, I’ve used spatial data as the building blocks for many of the models I build, and its especially pertinent for solar-based models.">
+In the past, I’ve used spatial data as the building blocks for many of the models I build, and it’s especially pertinent for solar-based models.">
 <meta property="og:locale" content="en-us">
 
   
@@ -336,7 +336,7 @@ if (!doNotTrack) {
 
 
 <p>A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential — I’ll be posting plenty about that when it’s more mature — but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.</p>
-<p>In the past, I’ve used spatial data as the building blocks for many of the models I build, and its especially pertinent for solar-based models. For example, a spatially specific estimate of solar irradiation is pretty indispensible when it comes to making supportable estimates for the performance of solar tech. For the solar app, I want the user to be able to specify their location and receive output data specific to their local climatic conditions.</p>
+<p>In the past, I’ve used spatial data as the building blocks for many of the models I build, and it’s especially pertinent for solar-based models. For example, a spatially specific estimate of solar irradiation is pretty indispensible when it comes to making supportable estimates for the performance of solar tech. For the solar app, I want the user to be able to specify their location and receive output data specific to their local climatic conditions.</p>
 <p>The easy solution for the app would be just to wrap up some raster data in .rds form and add it into the directory. However, that seems inelegant; apart from adding some fairly chunky files to the app bundle (think global coverage * 2–3 layers * 30-arc-second resolution * 12 months), it also means these have to be read in and out every time the app is loaded, slowing things down quite a bit. Inevitably, I’d end up making compromises — lower resolution for faster performance, skip a layer to avoid going over bundle size limits, etc.</p>
 <p>After a bit of head-scratching and searching, I discovered the National Renewable Energy Laboratory’s <a href="https://developer.nrel.gov/docs/solar/solar-resource-v1/">Developer Network</a>. NREL’s DN domain hosts a free application programming interface (API) allowing the user to query and retrieve solar-relevant data.</p>
 <p>Before starting, it’s worth noting that many APIs have R packages built around them, making their use very straightforward — the <code>rtweet</code> package is a mature (and very cool) example. Full disclosure here — I was originally going to do this blog post for the UK postcodes API hosted at <a href="http://api.postcodes.io/postcodes/" class="uri">http://api.postcodes.io/postcodes/</a> (also used in my app), and got fully halfway into it before realising that there’s already an R package built for this, documented <a href="http://walczak.org/2016/07/postcode-and-geolocation-api-for-the-uk/">here</a>. While the NREL API doesn’t have its own R package, all’s not lost — as it turns out, it’s very straightforward to knock together your own call. We’re going to use the <code>httr</code> and <code>jsonlite</code> packages to pull the call together.</p>
