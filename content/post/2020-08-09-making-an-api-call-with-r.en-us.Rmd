@@ -41,7 +41,7 @@ The easy solution for the app would be just to wrap up some raster data in .rds 
 
 After a bit of head-scratching and searching, I discovered the National Renewable Energy Laboratory's [Developer Network](https://developer.nrel.gov/docs/solar/solar-resource-v1/). NREL's DN domain hosts a free application programming interface (API) allowing the user to query and retrieve solar-relevant data.
 
-Before starting, it's worth noting that many APIs have R packages built around them, making their use very straightforward --- the `rtweet` package is a mature (and very cool) example. Full disclosure here --- I was originally going to do this blog post for the UK postcodes API hosted at <http://api.postcodes.io/postcodes/> (also used in my app), and got fully halfway into it before realising that there's already an R package built for this, documented [here](http://walczak.org/2016/07/postcode-and-geolocation-api-for-the-uk/). While the NREL API doesn't have its own R package, all's not lost --- as it turns out, it's very straightforward to knock together your own call. We're going to use the `httr` and `jsonlite` packages to pull the call together.
+Before starting, it's worth noting that many APIs have R packages built around them, making their use very straightforward --- the `rtweet` package is a mature (and very cool) example. Full disclosure here --- I was originally going to do this blog post for the UK postcodes API hosted at <http://api.postcodes.io/postcodes/> (also used in my app), and got fully halfway into it before realising that there's already an R package built for this, documented [here](http://walczak.org/2016/07/postcode-and-geolocation-api-for-the-uk/). By contrast, the NREL API doesn't have its own R package, but it's very straightforward to knock together your own call. We're going to use the `httr` and `jsonlite` packages to pull the call together.
 
 Based on documentation from the [API homepage](https://developer.nrel.gov/docs/solar/solar-resource-v1/), we can see that the URL required for the API takes this format:
 
@@ -59,7 +59,7 @@ api_key <- function() return("some_api_key")
 source("private/nrel-api-key.R")
 ```
 
-That done, here's a simple `paste0` based method to knock that call together. I'm not quite ready to tell the internet where I live, so I'm going to use the example lat/lon documented on the NREL developer page, which looks to be just north of Denver, Colorado, USA.
+That done, here's a simple `paste0` based method to knock that call together. For location, I'm going to use the example lat/lon documented on the NREL developer page, which looks to be just north of Denver, Colorado, USA.
 
 ```{r}
 base <- "https://developer.nrel.gov/api/solar/solar_resource/v1.json?api_key="
