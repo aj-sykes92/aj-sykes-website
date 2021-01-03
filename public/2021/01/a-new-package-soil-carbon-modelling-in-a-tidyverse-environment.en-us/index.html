@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Hugo 0.73.0 with theme Tranquilpeak 0.4.8-BETA">
+<meta name="author" content="Alasdair Sykes PhD">
+<meta name="keywords" content="tech">
+<meta name="description" content="I’ve built a new R package! After nearly a year of rehashing soil carbon modelling code across multiple projects, I finally found the time over the Christmas holidays (when else?) to properly document and contextualise it in a package. I am unapologetically borrowing from the vignette for this new package to form the bulk of this post, since the task of explaining myself intelligently is something I’m lucky to get right once.">
+
+
+<meta property="og:description" content="I’ve built a new R package! After nearly a year of rehashing soil carbon modelling code across multiple projects, I finally found the time over the Christmas holidays (when else?) to properly document and contextualise it in a package. I am unapologetically borrowing from the vignette for this new package to form the bulk of this post, since the task of explaining myself intelligently is something I’m lucky to get right once.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="soilc.ipcc --- a new R package for soil carbon modelling">
+<meta name="twitter:title" content="soilc.ipcc --- a new R package for soil carbon modelling">
+<meta property="og:url" content="/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/">
+<meta property="twitter:url" content="/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/">
+<meta property="og:site_name" content="Alasdair Sykes">
+<meta property="og:description" content="I’ve built a new R package! After nearly a year of rehashing soil carbon modelling code across multiple projects, I finally found the time over the Christmas holidays (when else?) to properly document and contextualise it in a package. I am unapologetically borrowing from the vignette for this new package to form the bulk of this post, since the task of explaining myself intelligently is something I’m lucky to get right once.">
+<meta name="twitter:description" content="I’ve built a new R package! After nearly a year of rehashing soil carbon modelling code across multiple projects, I finally found the time over the Christmas holidays (when else?) to properly document and contextualise it in a package. I am unapologetically borrowing from the vignette for this new package to form the bulk of this post, since the task of explaining myself intelligently is something I’m lucky to get right once.">
+<meta property="og:locale" content="en-us">
+
+  
+    <meta property="article:published_time" content="2021-01-03T00:00:00">
+  
+  
+    <meta property="article:modified_time" content="2021-01-03T00:00:00">
+  
+  
+  
+    
+      <meta property="article:section" content="R">
+    
+  
+  
+    
+      <meta property="article:tag" content="tidyverse">
+    
+      <meta property="article:tag" content="package">
+    
+      <meta property="article:tag" content="purrr">
+    
+      <meta property="article:tag" content="soil carbon">
+    
+  
+
+
+<meta name="twitter:card" content="summary">
+
+  <meta name="twitter:site" content="@alasdair_sykes">
+
+
+  <meta name="twitter:creator" content="@alasdair_sykes">
+
+
+
+
+
+
+
+
+
+
+  <meta property="og:image" content="https://www.gravatar.com/avatar/3621eeb16f4a9466b1d52bc75f2c72b9?s=640">
+  <meta property="twitter:image" content="https://www.gravatar.com/avatar/3621eeb16f4a9466b1d52bc75f2c72b9?s=640">
+
+
+    <title>soilc.ipcc --- a new R package for soil carbon modelling</title>
+
+    <link rel="icon" href="images/favicon.ico">
+    
+
+    
+
+    <link rel="canonical" href="/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/">
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.4/jquery.fancybox.min.css" integrity="sha256-vuXZ9LGmmwtjqFX1F+EKin1ThZMub58gKULUyf0qECk=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.4/helpers/jquery.fancybox-thumbs.min.css" integrity="sha256-SEa4XYAHihTcEP1f5gARTB2K26Uk8PsndQYHQC1f4jU=" crossorigin="anonymous" />
+    
+    
+    <link rel="stylesheet" href="/css/style-twzjdbqhmnnacqs0pwwdzcdbt8yhv8giawvjqjmyfoqnvazl0dalmnhdkvp7.min.css" />
+    
+    
+
+    
+      
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-174945806-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+    
+    
+  </head>
+
+  <body>
+    <div id="blog">
+      <header id="header" data-behavior="5">
+  <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+  <div class="header-title">
+    <a class="header-title-link" href="/">Alasdair Sykes</a>
+  </div>
+  
+    
+      <a class="header-right-picture "
+         href="/#about">
+    
+    
+    
+      
+        <img class="header-picture" src="https://www.gravatar.com/avatar/3621eeb16f4a9466b1d52bc75f2c72b9?s=90" alt="Author&#39;s picture" />
+      
+    
+    </a>
+  
+</header>
+
+      <nav id="sidebar" data-behavior="5">
+  <div class="sidebar-container">
+    
+      <div class="sidebar-profile">
+        <a href="/#about">
+          <img class="sidebar-profile-picture" src="https://www.gravatar.com/avatar/3621eeb16f4a9466b1d52bc75f2c72b9?s=110" alt="Author&#39;s picture" />
+        </a>
+        <h4 class="sidebar-profile-name">Alasdair Sykes PhD</h4>
+        
+          <h5 class="sidebar-profile-bio"><strong>Modeller &amp; data scientist</strong> with an interest in <strong>agriculture &amp; climate change</strong> | <strong>Post-doctoral researcher</strong> at <a href="https://www.sruc.ac.uk/asykes">SRUC</a> | <strong>Research software engineer</strong> at <a href="https://www.agrecalc.com">Agrecalc</a> | <strong>Co-editor</strong> at <a href="https://www.fringebiscuit.comm">Fringebiscuit</a> | Background image by <a href="https://artnclick.shootproof.com">Art &lsquo;n&rsquo; Click</a></h5>
+        
+      </div>
+    
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+      
+      <span class="sidebar-button-desc">Home</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/#about">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-user"></i>
+      
+      <span class="sidebar-button-desc">About</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/alasdair-cv.pdf">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-graduation-cap"></i>
+      
+      <span class="sidebar-button-desc">Curriculum Vitae</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/shiny-apps">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-code"></i>
+      
+      <span class="sidebar-button-desc">Shiny</span>
+    </a>
+  </li>
+
+
+    </ul>
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://github.com/aj-sykes92">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-github"></i>
+      
+      <span class="sidebar-button-desc">GitHub</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://twitter.com/alasdair_sykes">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-twitter"></i>
+      
+      <span class="sidebar-button-desc">Twitter</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://scholar.google.co.uk/citations?user=bipLv_YAAAAJ&amp;hl=en">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-google"></i>
+      
+      <span class="sidebar-button-desc">Google Scholar</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://www.linkedin.com/in/alasdair-sykes-1b81435a/">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-linkedin"></i>
+      
+      <span class="sidebar-button-desc">LinkedIn</span>
+    </a>
+  </li>
+
+
+    </ul>
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/r-community-links">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-link"></i>
+      
+      <span class="sidebar-button-desc">Links</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/archives">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+      
+      <span class="sidebar-button-desc">Archives</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/index.xml">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+      
+      <span class="sidebar-button-desc">RSS</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/tags">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+      
+      <span class="sidebar-button-desc">Tags</span>
+    </a>
+  </li>
+
+
+    </ul>
+  </div>
+</nav>
+
+      
+
+      <div id="main" data-behavior="5"
+        class="
+               hasCoverMetaIn
+               ">
+        <article class="post" itemscope itemType="http://schema.org/BlogPosting">
+          
+          
+            <div class="post-header main-content-wrap text-left">
+  
+    <h1 class="post-title" itemprop="headline">
+      soilc.ipcc --- a new R package for soil carbon modelling
+    </h1>
+  
+  
+  <div class="postShorten-meta post-meta">
+    
+      <time itemprop="datePublished" datetime="2021-01-03T00:00:00Z">
+        
+  January 3, 2021
+
+      </time>
+    
+    
+  
+  
+    <span>in</span>
+    
+      <a class="category-link" href="/categories/r">R</a>
+    
+  
+
+  </div>
+
+</div>
+          
+          <div class="post-content markdown" itemprop="articleBody">
+            <div class="main-content-wrap">
+              
+
+
+<blockquote>
+<p>I’ve built a new R package! After nearly a year of rehashing soil carbon modelling code across multiple projects, I finally found the time over the Christmas holidays (when else?) to properly document and contextualise it in a package. I am unapologetically borrowing from the vignette for this new package to form the bulk of this post, since the task of explaining myself intelligently is something I’m lucky to get right once.
+Find the source code for the package <a href="https://github.com/aj-sykes92/soilc.ipcc">here</a>. Ok — the rest of this post is basically a vignette. Enjoy!</p>
+</blockquote>
+<div id="soil-carbon-modelling-in-a-tidyverse-environment-why" class="section level2">
+<h2>Soil carbon modelling in a <code>tidyverse</code> environment — why?</h2>
+<p>Soil carbon is currently one of the most studied and debated topics in the field of agriculture and climate change. Like much which occurs on the boundary of human management and biophysical systems, it’s also extremely challenging to measure or model accurately. To get practical answers to land managers, academics typically need to rely either on simple, empirically calibrated methods, or on highly complex process-based models. Both methods have drawbacks; the former is imprecise, the latter time-consuming, and both are difficult to extrapolate. Finding some middle ground, the Intergovernmental Panel on Climate Change recently (June 2019) released a simplified, globally calibrated three-pool process-based soil carbon model, along with accompanying empirical methods to estimate the required input parameters. The full details of this model are given on the homepage of the <a href="https://www.ipcc-nggip.iges.or.jp/public/2019rf/vol4.html">2019 Refinement to the 2006 IPCC Guidelines for
+National Greenhouse Gas Inventories</a>.</p>
+<p>This package ties all of this information together in an easy-to-use, flexible model implementation which works from start to end of the modelling process — beginning with management information, ending with a soil carbon stock estimate — and which can be run as a seamless part of a <code>tidyverse</code>-based workflow.</p>
+<blockquote>
+<p><strong>Disclaimer:</strong> This package is entirely the creation of its author, and no warranty is given or implied as to its use, or to its fidelity to the modelling framework it represents (with that said, my intention is to reproduce this framework faithfully, so if you notice any errors or omissions, please let me know)!</p>
+</blockquote>
+</div>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>This package is hosted on Github and can be installed using the <code>devtools</code> package:</p>
+<pre class="r"><code># install.packages(&quot;devtools&quot;)
+devtools::install_github(&quot;aj-sykes92/soilc.ipcc&quot;)</code></pre>
+<blockquote>
+<p>Note: If this doesn’t work, update <code>devtools</code>, as Github recently changed the term it uses for the primary version of a source code repository.</p>
+</blockquote>
+</div>
+<div id="usage-run_model" class="section level2">
+<h2>Usage — <code>run_model</code></h2>
+<p><img src="/post/2021-01-03-a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us_files/figure-html/front-matter-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>The development process for package aimed to tread the line between making things ‘just work’ and giving the accomplished user enough flexibility to use and modify any part of the model independently. In the spirit of doing the fun stuff first, this section will demonstrate the <code>run_model</code> function — this is a complete, out-of-the-box soil carbon model which will give quick and painless carbon stock change estimates when passed data of the right kind.</p>
+<p>To help out here, the package also contains a small dataset of exactly the right kind, called <code>toy_input</code>:</p>
+<pre class="r"><code>glimpse(toy_input)</code></pre>
+<pre><code>## Rows: 10
+## Columns: 7
+## $ year        &lt;int&gt; 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020
+## $ climdata    &lt;list&gt; [&lt;tbl_df[12 x 3]&gt;, &lt;tbl_df[12 x 3]&gt;, &lt;tbl_df[12 x 3]&gt;, &lt;…
+## $ c_input     &lt;dbl&gt; 5.298971, 4.945811, 5.326737, 4.754702, 4.488324, 4.85921…
+## $ lignin_frac &lt;dbl&gt; 0.005905677, 0.006083535, 0.006065450, 0.005974941, 0.005…
+## $ n_frac      &lt;dbl&gt; 0.05013271, 0.04963280, 0.05039613, 0.05054946, 0.0500886…
+## $ sand_frac   &lt;dbl&gt; 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43
+## $ till_type   &lt;chr&gt; &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;…</code></pre>
+<p>It’s an ordinary tibble, with one list column; this contains a list of nested climate data, each of dimensions 3 * 12:</p>
+<pre class="r"><code>glimpse(toy_input$climdata[[1]])</code></pre>
+<pre><code>## Rows: 12
+## Columns: 3
+## $ temp   &lt;dbl&gt; 14.10027, 17.39389, 17.59273, 15.41833, 15.20850, 16.24473, 17…
+## $ precip &lt;dbl&gt; 53.39583, 58.48306, 55.08518, 57.16217, 53.38465, 52.36533, 55…
+## $ pet    &lt;dbl&gt; 46.52958, 43.81984, 42.76176, 44.95919, 44.06107, 40.87934, 44…</code></pre>
+<p>Passed a dataset of this type, the <code>run_model</code> function will output results with no further input required:</p>
+<pre class="r"><code>toy_input %&gt;%
+  run_model() %&gt;%
+  glimpse()</code></pre>
+<pre><code>## Rows: 10
+## Columns: 14
+## $ year           &lt;int&gt; 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, …
+## $ c_input        &lt;dbl&gt; 5.298971, 4.945811, 5.326737, 4.754702, 4.488324, 4.85…
+## $ lignin_frac    &lt;dbl&gt; 0.005905677, 0.006083535, 0.006065450, 0.005974941, 0.…
+## $ n_frac         &lt;dbl&gt; 0.05013271, 0.04963280, 0.05039613, 0.05054946, 0.0500…
+## $ sand_frac      &lt;dbl&gt; 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, …
+## $ till_type      &lt;chr&gt; &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;…
+## $ tfac           &lt;dbl&gt; 0.5189817, 0.4939976, 0.4878877, 0.4758409, 0.4754930,…
+## $ wfac           &lt;dbl&gt; 2.223240, 2.175849, 2.226038, 2.194289, 2.171587, 2.20…
+## $ climdata       &lt;list&gt; [&lt;tbl_df[12 x 3]&gt;, &lt;tbl_df[12 x 3]&gt;, &lt;tbl_df[12 x 3]&gt;…
+## $ active_y       &lt;dbl&gt; 0.1820583, 0.1823888, 0.1944128, 0.1805120, 0.1723055,…
+## $ slow_y         &lt;dbl&gt; 1.694165, 1.692363, 1.768588, 1.705763, 1.634969, 1.69…
+## $ passive_y      &lt;dbl&gt; 37.39614, 37.39293, 37.40793, 37.40198, 37.38430, 37.3…
+## $ total_y        &lt;dbl&gt; 39.27237, 39.26768, 39.37093, 39.28825, 39.19157, 39.2…
+## $ c_stock_change &lt;dbl&gt; -0.023740126, -0.004686108, 0.103255479, -0.082681955,…</code></pre>
+<p>A great deal of intermediate calculations are generated and dropped when <code>run_model</code> executes with its default arguments; for more information on the model run process, and a better ability to interrogate the results, it’s best to alter the default arguments a bit:</p>
+<pre class="r"><code>toy_input %&gt;%
+  run_model(drop_prelim = FALSE, drop_runin = FALSE) %&gt;%
+  glimpse()</code></pre>
+<pre><code>## Rows: 11
+## Columns: 22
+## $ year           &lt;int&gt; NA, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 20…
+## $ c_input        &lt;dbl&gt; 4.958704, 5.298971, 4.945811, 5.326737, 4.754702, 4.48…
+## $ lignin_frac    &lt;dbl&gt; 0.006005288, 0.005905677, 0.006083535, 0.006065450, 0.…
+## $ n_frac         &lt;dbl&gt; 0.05024811, 0.05013271, 0.04963280, 0.05039613, 0.0505…
+## $ sand_frac      &lt;dbl&gt; 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, …
+## $ till_type      &lt;chr&gt; &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;, &quot;full&quot;…
+## $ tfac           &lt;dbl&gt; 0.4850891, 0.5189817, 0.4939976, 0.4878877, 0.4758409,…
+## $ wfac           &lt;dbl&gt; 2.195574, 2.223240, 2.175849, 2.226038, 2.194289, 2.17…
+## $ climdata       &lt;list&gt; [NULL, &lt;tbl_df[12 x 3]&gt;, &lt;tbl_df[12 x 3]&gt;, &lt;tbl_df[12…
+## $ tillfac        &lt;dbl&gt; 3.036, 3.036, 3.036, 3.036, 3.036, 3.036, 3.036, 3.036…
+## $ alpha          &lt;dbl&gt; 2.528185, 2.701829, 2.521510, 2.715727, 2.424212, 2.28…
+## $ k_a            &lt;dbl&gt; 13.69867, 14.84046, 13.82492, 13.96887, 13.42965, 13.2…
+## $ k_s            &lt;dbl&gt; 0.6757991, 0.7321271, 0.6820271, 0.6891289, 0.6625271,…
+## $ k_p            &lt;dbl&gt; 0.007338187, 0.007949827, 0.007405814, 0.007482929, 0.…
+## $ active_y_ss    &lt;dbl&gt; 0.1845569, 0.1820583, 0.1823888, 0.1944128, 0.1805120,…
+## $ slow_y_ss      &lt;dbl&gt; 1.711369, 1.687870, 1.691523, 1.802973, 1.673761, 1.59…
+## $ passive_y_ss   &lt;dbl&gt; 37.40018, 36.89231, 36.96202, 39.39844, 36.58002, 34.9…
+## $ active_y       &lt;dbl&gt; 0.1845569, 0.1820583, 0.1823888, 0.1944128, 0.1805120,…
+## $ slow_y         &lt;dbl&gt; 1.711369, 1.694165, 1.692363, 1.768588, 1.705763, 1.63…
+## $ passive_y      &lt;dbl&gt; 37.40018, 37.39614, 37.39293, 37.40793, 37.40198, 37.3…
+## $ total_y        &lt;dbl&gt; 39.29611, 39.27237, 39.26768, 39.37093, 39.28825, 39.1…
+## $ c_stock_change &lt;dbl&gt; 0.000000000, -0.023740126, -0.004686108, 0.103255479, …</code></pre>
+<p>You can also choose whether or not to deal with the nested climate data inside or outside of the <code>run_model</code> function. This is useful primarily because the role of climate data varies with model usage — where it might be important to have annually-specific climate datasets for one use-case, an annual average will do for another. This climate data is a multiplying factor for file size, so it’s useful to not be forced to over-inflate a file through repetitions. Here’s how this works:</p>
+<pre class="r"><code># with automated climfac calculation
+x &lt;- run_model(toy_input) # default calculate_climfacs = TRUE
+
+# with manual climfac calculation
+y &lt;- toy_input %&gt;%
+  mutate(
+    tfac = map_dbl(climdata, ~tfac(.x$temp)),
+    wfac = map_dbl(climdata, ~wfac(.x$precip, .x$pet))
+    ) %&gt;%
+  run_model(calculate_climfacs = FALSE)</code></pre>
+<p>Here, <code>x</code> and <code>y</code> are identical datasets. Obviously, the <code>x</code> method is more efficient if you need every <code>climdata</code> object to be different, by the <code>y</code> method separates this operation from <code>run_model</code> in case you want to calculate <code>tfac</code> and <code>wfac</code> first, and repeat them over multiple datasets (say, perhaps, 10 different treatments in the same study site) before running the model.</p>
+<p>The <code>run_model</code> function also contains default arguments naming each of the individual parameters it requires from the <code>data</code> object — it’s anticipated these will be ignored 99.9% of the time, but they provide flexibility so you can modify the function behaviour rather than changing your data if you so desire.</p>
+</div>
+<div id="usage-the-input-data-setup-functions" class="section level2">
+<h2>Usage — the input data setup functions</h2>
+<p>The <code>toy_input</code> dataset we’ve been working with thus far contains exactly what the soil carbon model needs to know in order to make an estimate of soil C stocks; however, the type of information contained (e.g. carbon inputs, lignin fractions; run <code>?toy_input</code> for full descriptions of all the variables) is rarely readily available to most land managers. To help set up the model, this package also contains functions for processing the kind of information which a land manager is likely to know (e.g. crop yields, manure application rates) and converts it into an input that the model expects.</p>
+<p>To make this happen, the package has a two-tiered set of functions. The highest tier contains just one function, <code>build_soil_input</code> — this function can take as many arguments as you care to pass it, and it expects the output of a set of second-tier helper functions to form these inputs. These functions are <code>add_crop</code> and <code>add_manure</code>. We will demonstrate these first:</p>
+<pre class="r"><code>crop1 &lt;- add_crop(crop = &quot;wheat&quot;, yield_tha = rep(7.2, 10), frac_remove = 0.3, frac_renew = 1)
+manure1 &lt;- add_manure(livestock_type = &quot;beef_cattle&quot;, n_rate = rep(100, 10))
+
+str(crop1)</code></pre>
+<pre><code>## List of 4
+##  $ crop       : chr &quot;wheat&quot;
+##  $ yield_tha  : num [1:10] 7.2 7.2 7.2 7.2 7.2 7.2 7.2 7.2 7.2 7.2
+##  $ frac_remove: num 0.3
+##  $ frac_renew : num 1
+##  - attr(*, &quot;class&quot;)= chr [1:2] &quot;crop&quot; &quot;list&quot;</code></pre>
+<pre class="r"><code>str(manure1)</code></pre>
+<pre><code>## List of 2
+##  $ livestock_type: chr &quot;beef_cattle&quot;
+##  $ n_rate        : num [1:10] 100 100 100 100 100 100 100 100 100 100
+##  - attr(*, &quot;class&quot;)= chr [1:2] &quot;manure&quot; &quot;list&quot;</code></pre>
+<p>These list objects are admittedly not very human-readable, but they aren’t supposed to be. When passed to <code>build_soil_input</code>, the function maps an S3 method across the arguments list, and uses the information contained to make an estimate of the key parameters:</p>
+<pre class="r"><code>build_soil_input(crop1, manure1) %&gt;%
+  glimpse()</code></pre>
+<pre><code>## Rows: 10
+## Columns: 6
+## $ om_input     &lt;dbl&gt; 15.71912, 15.71912, 15.71912, 15.71912, 15.71912, 15.719…
+## $ c_input      &lt;dbl&gt; 6.675944, 6.675944, 6.675944, 6.675944, 6.675944, 6.6759…
+## $ n_input      &lt;dbl&gt; 0.1790305, 0.1790305, 0.1790305, 0.1790305, 0.1790305, 0…
+## $ lignin_input &lt;dbl&gt; 0.9939831, 0.9939831, 0.9939831, 0.9939831, 0.9939831, 0…
+## $ n_frac       &lt;dbl&gt; 0.01138935, 0.01138935, 0.01138935, 0.01138935, 0.011389…
+## $ lignin_frac  &lt;dbl&gt; 0.063234, 0.063234, 0.063234, 0.063234, 0.063234, 0.0632…</code></pre>
+<p>The output tibble is of correct format to provide the organic matter elements to a <code>run_model</code> input dataframe. Multiple manure applications — or complex management strategies like cover cropping — can be absorbed since <code>build_soil_input</code> has no expectations as to the number of arguments. Note also that the single-value (scalar) elements specified in <code>add_crop</code> and <code>add_manure</code> are recycled, and the output is 10 rows long, the same as the vector elements. If you pass vectors of different &gt; 1 lengths to <code>build_soil_input</code>, it will pad the end of the shorter vectors with zeroes to enable it to continue, and warn you that you’ve probably/possibly made an error in your inputs.</p>
+</div>
+<div id="usage-levelling-up-to-multiple-model-runs" class="section level2">
+<h2>Usage — levelling up to multiple model runs</h2>
+<p>Usually when you’re running a model of this type, you want to do it more than once. Whether it’s multiple years, multiple climate scenarios, multiple grid cells or multiple management scenarios, it’s very unlikely you’re going to be one-and-done with your modelling. With this in mind, this package has been designed to work as well as possible with <code>tidyverse</code>’s <code>purrr</code>, and the list-wise and nested-tibble operations this allows. All the functions — and particularly <code>run_model</code> — work well with lists and it is anticipated they will be used in this context.</p>
+<p>This post is not intended to be a tutorial on <code>purrr</code> (go <a href="https://r4ds.had.co.nz/iteration.html">here</a> for that), so the best way to demonstrate is by example. The header plot for the <code>run_model</code> section of this post was built with the <code>toy_input</code> used to demonstrate the package, along with some random sampling and iteration with <code>purrr</code>.</p>
+<pre class="r"><code># function build 100-row dataset by replicating toy_input 10x
+build_fake_data &lt;- function(data) {
+  map(1:10, ~data) %&gt;%
+    bind_rows() %&gt;%
+    mutate(year = 2001:2100,
+           mod_fac = seq(from = 1, to = runif(1, 0.5, 2), length.out = 100) + rnorm(100, 0, 0.02),
+           c_input = c_input * mod_fac,
+           till_type = ifelse(year &gt; sample(2001:2100, 1), &quot;reduced&quot;, till_type)) %&gt;%
+    select(-mod_fac)
+}
+
+# build 10 fake datasets with random inputs
+set.seed(2065)
+fake_data &lt;- map(1:10, ~build_fake_data(toy_input))
+
+# map run model across list
+output &lt;- map(fake_data, run_model)
+
+# plot
+output %&gt;%
+  set_names(paste0(&quot;run_&quot;, 1:10)) %&gt;%
+  bind_rows(.id = &quot;run&quot;) %&gt;%
+  ggplot(aes(x = year, y = total_y, group = run)) +
+  geom_line(colour = &quot;darkred&quot;,) +
+  labs(x = &quot;Year&quot;,
+       y = expression(&quot;Soil C stocks, tonnes C ha&quot;^{-1})) +
+  theme_classic()</code></pre>
+</div>
+<div id="package-data" class="section level2">
+<h2>Package data</h2>
+<p>The <code>toy_input</code> data used in the above examples is just the tip of the iceberg for package data. This section covers the data utilised in package functions, which is also made available to the user for information and modification if desired.</p>
+<div id="soil-carbon-model-parameters" class="section level3">
+<h3>Soil carbon model parameters</h3>
+<p>All functions which run under the wrapper function <code>run_model</code>, and this wrapper function itself, make use of a named list object containing model parameters. This object is passed to the final argument of each function, <code>params</code>. The default parameter list can be directly accessed by the user, and contains all parameters and accompanying descriptions:</p>
+<pre class="r"><code>head(soilc_params, 1)</code></pre>
+<pre><code>## $tillfac_ft
+## $tillfac_ft$be
+## [1] 3.036
+## 
+## $tillfac_ft$sd
+## [1] 0.579
+## 
+## $tillfac_ft$min
+## [1] 1.4
+## 
+## $tillfac_ft$max
+## [1] 4
+## 
+## $tillfac_ft$desc
+## [1] &quot;Tillage disturbance modifier for decay rates under full tillage&quot;</code></pre>
+<pre class="r"><code>names(soilc_params)</code></pre>
+<pre><code>##  [1] &quot;tillfac_ft&quot; &quot;tillfac_rt&quot; &quot;tillfac_nt&quot; &quot;wfacpar1&quot;   &quot;wfacpar2&quot;  
+##  [6] &quot;wfacpar3&quot;   &quot;kfaca&quot;      &quot;k3par1&quot;     &quot;k3par2&quot;     &quot;kfacs&quot;     
+## [11] &quot;kfacp&quot;      &quot;f1&quot;         &quot;f2&quot;         &quot;f2_ft&quot;      &quot;f2_rt&quot;     
+## [16] &quot;f2_nt&quot;      &quot;f3&quot;         &quot;f4par1&quot;     &quot;f4par2&quot;     &quot;f5&quot;        
+## [21] &quot;f6&quot;         &quot;f7&quot;         &quot;f8&quot;         &quot;ta&quot;         &quot;tb&quot;        
+## [26] &quot;tmax&quot;       &quot;topt&quot;       &quot;sp1&quot;        &quot;sp2&quot;</code></pre>
+<p>If the user wishes to modify the default parameters, this list can be used as the basis for a custom model parameter object, and this passed to <code>run_model</code> or any of its core functions.</p>
+</div>
+<div id="soil-input-function-parameters" class="section level3">
+<h3>Soil input function parameters</h3>
+<p>The setup for the model input data (<code>build_soil_inputs</code>) also requires a number of core datasets. These are made available to the user in the same way, and can be accessed under <code>crop_agrc</code> (above-ground residue coefficients), <code>crop_bgrc</code> (below-ground residue coefficients), <code>crop_fractions</code> (crop nitrogen and lignin fractions) and <code>man_fractions</code> (manure nitrogen and lignin fractions).</p>
+<p>The following may also be useful in determining possible arguments for <code>crop</code> and <code>livestock_type</code> in the <code>add_*</code> functions:</p>
+<pre class="r"><code>names(crop_fractions)</code></pre>
+<pre><code>##  [1] &quot;alfalfa&quot;             &quot;barley&quot;              &quot;beans_and_pulses&quot;   
+##  [4] &quot;grass&quot;               &quot;grass_clover_mix&quot;    &quot;maize&quot;              
+##  [7] &quot;millet&quot;              &quot;n_fixing_forage&quot;     &quot;non_legume_hay&quot;     
+## [10] &quot;non_n_fixing_forage&quot; &quot;oats&quot;                &quot;peanut&quot;             
+## [13] &quot;potato&quot;              &quot;rice&quot;                &quot;rye&quot;                
+## [16] &quot;sorghum&quot;             &quot;soybean&quot;             &quot;spring_wheat&quot;       
+## [19] &quot;tubers&quot;              &quot;wheat&quot;               &quot;winter_wheat&quot;</code></pre>
+<pre class="r"><code>names(man_fractions)</code></pre>
+<pre><code>## [1] &quot;dairy_cattle&quot; &quot;beef_cattle&quot;  &quot;poultry&quot;      &quot;swine&quot;        &quot;horses&quot;      
+## [6] &quot;sheep&quot;        &quot;none&quot;</code></pre>
+</div>
+</div>
+<div id="acknowledgements" class="section level2">
+<h2>Acknowledgements</h2>
+<p>Thanks to the Natural Environment Research Council, the Legumes Translated project, and the University of Edinburgh/Scotland’s Rural College MSc programmes for providing the context, projects and requirements which led to the development of much of the code in this package. <a href="https://github.com/csgillespie">Colin Gillespie</a> has been an incredible and approachable mentor, and his input to my coding generally has undoubtedly influenced the development of this package. The package is based around <code>tidyverse</code> ideas and functions, so thanks go also to Hadley Wickham and the <code>tidyverse</code> team for building and maintaining this incredible environment.</p>
+</div>
+<div id="contribute" class="section level2">
+<h2>Contribute</h2>
+<p>If you would like to contribute to this package, please file an issue, make a pull request on GitHub, or contact the author on Twitter <a href="https://twitter.com/alasdair_sykes">@alasdair_sykes</a> or by email at <a href="mailto:alasdair.sykes@sruc.ac.uk" class="email">alasdair.sykes@sruc.ac.uk</a>.</p>
+</div>
+
+              
+            </div>
+          </div>
+          <div id="post-footer" class="post-footer main-content-wrap">
+            
+              
+                
+                
+                  <div class="post-footer-tags">
+                    <span class="text-color-light text-small">TAGGED IN</span><br/>
+                    
+  <a class="tag tag--primary tag--small" href="/tags/tidyverse/">tidyverse</a>
+
+  <a class="tag tag--primary tag--small" href="/tags/package/">package</a>
+
+  <a class="tag tag--primary tag--small" href="/tags/purrr/">purrr</a>
+
+  <a class="tag tag--primary tag--small" href="/tags/soil-carbon/">soil carbon</a>
+
+                  </div>
+                
+              
+            
+            <div class="post-actions-wrap">
+  
+      <nav >
+        <ul class="post-actions post-action-nav">
+          
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <i class="fa fa-angle-left"></i>
+                  <span class="hide-xs hide-sm text-small icon-ml">NEXT</span>
+                </a>
+            </li>
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--default tooltip--top" href="/2020/08/making-an-api-call-with-r.en-us/" data-tooltip="Making an API call with R">
+              
+                  <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
+                  <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+          
+        </ul>
+      </nav>
+    <ul class="post-actions post-action-share" >
+      
+        <li class="post-action hide-lg hide-md hide-sm">
+          <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions">
+            <i class="fa fa-share-alt"></i>
+          </a>
+        </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/">
+              <i class="fa fa-facebook-official"></i>
+            </a>
+          </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+        
+      
+      
+        <li class="post-action">
+          <a class="post-action-btn btn btn--default" href="#disqus_thread">
+            <i class="fa fa-comment-o"></i>
+          </a>
+        </li>
+      
+      <li class="post-action">
+        
+          <a class="post-action-btn btn btn--default" href="#">
+        
+          <i class="fa fa-list"></i>
+        </a>
+      </li>
+    </ul>
+  
+</div>
+
+            
+              
+                <div id="disqus_thread">
+  <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+              
+            
+          </div>
+        </article>
+        <footer id="footer" class="main-content-wrap">
+  <span class="copyrights">
+    &copy; 2021 Alasdair Sykes PhD. All Rights Reserved
+  </span>
+</footer>
+
+      </div>
+      <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+        <div class="post-actions-wrap">
+  
+      <nav >
+        <ul class="post-actions post-action-nav">
+          
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <i class="fa fa-angle-left"></i>
+                  <span class="hide-xs hide-sm text-small icon-ml">NEXT</span>
+                </a>
+            </li>
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--default tooltip--top" href="/2020/08/making-an-api-call-with-r.en-us/" data-tooltip="Making an API call with R">
+              
+                  <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
+                  <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+          
+        </ul>
+      </nav>
+    <ul class="post-actions post-action-share" >
+      
+        <li class="post-action hide-lg hide-md hide-sm">
+          <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions">
+            <i class="fa fa-share-alt"></i>
+          </a>
+        </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/">
+              <i class="fa fa-facebook-official"></i>
+            </a>
+          </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+        
+      
+      
+        <li class="post-action">
+          <a class="post-action-btn btn btn--default" href="#disqus_thread">
+            <i class="fa fa-comment-o"></i>
+          </a>
+        </li>
+      
+      <li class="post-action">
+        
+          <a class="post-action-btn btn btn--default" href="#">
+        
+          <i class="fa fa-list"></i>
+        </a>
+      </li>
+    </ul>
+  
+</div>
+
+      </div>
+      <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+  <i id="btn-close-shareoptions" class="fa fa-close"></i>
+  <ul class="share-options">
+    
+      <li class="share-option">
+        <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=%2F2021%2F01%2Fa-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us%2F">
+          <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
+        </a>
+      </li>
+    
+      <li class="share-option">
+        <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=%2F2021%2F01%2Fa-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us%2F">
+          <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+    </div>
+    
+    <div id="about">
+  <div id="about-card">
+    <div id="about-btn-close">
+      <i class="fa fa-remove"></i>
+    </div>
+    
+      <img id="about-card-picture" src="https://www.gravatar.com/avatar/3621eeb16f4a9466b1d52bc75f2c72b9?s=110" alt="Author&#39;s picture" />
+    
+    <h4 id="about-card-name">Alasdair Sykes PhD</h4>
+    
+      <div id="about-card-bio"><strong>Modeller &amp; data scientist</strong> with an interest in <strong>agriculture &amp; climate change</strong> | <strong>Post-doctoral researcher</strong> at <a href="https://www.sruc.ac.uk/asykes">SRUC</a> | <strong>Research software engineer</strong> at <a href="https://www.agrecalc.com">Agrecalc</a> | <strong>Co-editor</strong> at <a href="https://www.fringebiscuit.comm">Fringebiscuit</a> | Background image by <a href="https://artnclick.shootproof.com">Art &lsquo;n&rsquo; Click</a></div>
+    
+    
+      <div id="about-card-job">
+        <i class="fa fa-briefcase"></i>
+        <br/>
+        Agricultural Systems Modeller
+      </div>
+    
+    
+      <div id="about-card-location">
+        <i class="fa fa-map-marker"></i>
+        <br/>
+        Edinburgh, Scotland
+      </div>
+    
+  </div>
+</div>
+
+    
+
+    
+  
+    
+      <div id="cover" style="background-image:url('/images/ajs-cover3.jpg');"></div>
+    
+  
+
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.7/js/jquery.fancybox.min.js" integrity="sha256-GEAnjcTqVP+vBp3SSc8bEDQqvWAZMiHyUSIorrWwH50=" crossorigin="anonymous"></script>
+
+
+<script src="/js/script-pcw6v3xilnxydl1vddzazdverrnn9ctynvnxgwho987mfyqkuylcb1nlt.min.js"></script>
+
+
+<script lang="javascript">
+window.onload = updateMinWidth;
+window.onresize = updateMinWidth;
+document.getElementById("sidebar").addEventListener("transitionend", updateMinWidth);
+function updateMinWidth() {
+  var sidebar = document.getElementById("sidebar");
+  var main = document.getElementById("main");
+  main.style.minWidth = "";
+  var w1 = getComputedStyle(main).getPropertyValue("min-width");
+  var w2 = getComputedStyle(sidebar).getPropertyValue("width");
+  var w3 = getComputedStyle(sidebar).getPropertyValue("left");
+  main.style.minWidth = `calc(${w1} - ${w2} - ${w3})`;
+}
+</script>
+
+<script>
+$(document).ready(function() {
+  hljs.configure({ classPrefix: '', useBR: false });
+  $('pre.code-highlight > code, pre > code').each(function(i, block) {
+    if (!$(this).hasClass('codeblock')) {
+      $(this).addClass('codeblock');
+    }
+    hljs.highlightBlock(block);
+  });
+});
+</script>
+
+
+  
+    
+      <script>
+        var disqus_config = function () {
+          this.page.url = '\/2021\/01\/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us\/';
+          
+            this.page.identifier = '\/2021\/01\/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us\/'
+          
+        };
+        (function() {
+          
+          
+          if (window.location.hostname == "localhost") {
+            return;
+          }
+          var d = document, s = d.createElement('script');
+          var disqus_shortname = 'alasdairsykes';
+          s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+        })();
+      </script>
+    
+  
+
+
+
+
+    
+  </body>
+</html>
+

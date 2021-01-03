@@ -1,0 +1,223 @@
+---
+title: 'soilc.ipcc --- a new R package for soil carbon modelling'
+author: Alasdair Sykes
+date: '2021-01-03'
+slug: a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us
+categories:
+  - R
+tags:
+  - tidyverse
+  - package
+  - purrr
+  - soil carbon
+keywords:
+  - tech
+---
+
+> I've built a new R package! After nearly a year of rehashing soil carbon modelling code across multiple projects, I finally found the time over the Christmas holidays (when else?) to properly document and contextualise  it in a package. I am unapologetically borrowing from the vignette for this new package to form the bulk of this post, since the task of explaining myself intelligently is something I'm lucky to get right once.
+> Find the source code for the package [here](https://github.com/aj-sykes92/soilc.ipcc). Ok --- the rest of this post is basically a vignette. Enjoy!
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(soilc.ipcc)
+library(tidyverse)
+```
+
+## Soil carbon modelling in a `tidyverse` environment --- why?
+
+Soil carbon is currently one of the most studied and debated topics in the field of agriculture and climate change. Like much which occurs on the boundary of human management and biophysical systems, it's also extremely challenging to measure or model accurately. To get practical answers to land managers, academics typically need to rely either on simple, empirically calibrated methods, or on highly complex process-based models. Both methods have drawbacks; the former is imprecise, the latter time-consuming, and both are difficult to extrapolate. Finding some middle ground, the Intergovernmental Panel on Climate Change recently (June 2019) released a simplified, globally calibrated three-pool process-based soil carbon model, along with accompanying empirical methods to estimate the required input parameters. The full details of this model are given on the homepage of the [2019 Refinement to the 2006 IPCC Guidelines for
+National Greenhouse Gas Inventories](https://www.ipcc-nggip.iges.or.jp/public/2019rf/vol4.html).
+
+This package ties all of this information together in an easy-to-use, flexible model implementation which works from start to end of the modelling process --- beginning with management information, ending with a soil carbon stock estimate --- and which can be run as a seamless part of a `tidyverse`-based workflow.
+
+> **Disclaimer:** This package is entirely the creation of its author, and no warranty is given or implied as to its use, or to its fidelity to the modelling framework it represents (with that said, my intention is to reproduce this framework faithfully, so if you notice any errors or omissions, please let me know)!
+
+## Installation
+
+This package is hosted on Github and can be installed using the `devtools` package:
+
+```{r package-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("aj-sykes92/soilc.ipcc")
+```
+
+> Note: If this doesn't work, update `devtools`, as Github recently changed the term it uses for the primary version of a source code repository.
+
+## Usage --- `run_model`
+
+```{r front-matter, include = TRUE, echo = FALSE, fig.width = 10, fig.height = 4, fig.align = "center"}
+
+# function build 100-row dataset by replicating toy_input 10x
+build_fake_data <- function(data) {
+  map(1:10, ~data) %>%
+    bind_rows() %>%
+    mutate(year = 2001:2100,
+           mod_fac = seq(from = 1, to = runif(1, 0.5, 2), length.out = 100) + rnorm(100, 0, 0.02),
+           c_input = c_input * mod_fac,
+           till_type = ifelse(year > sample(2001:2100, 1), "reduced", till_type)) %>%
+    select(-mod_fac)
+}
+
+# build 10 fake datasets with random inputs
+set.seed(2065)
+fake_data <- map(1:10, ~build_fake_data(toy_input))
+
+# run model
+output <- map(fake_data, run_model)
+
+# plot
+output %>%
+  set_names(paste0("run_", 1:10)) %>%
+  bind_rows(.id = "run") %>%
+  ggplot(aes(x = year, y = total_y, group = run)) +
+  geom_line(colour = "darkred",) +
+  labs(x = "Year",
+       y = expression("Soil C stocks, tonnes C ha"^{-1})) +
+  theme_classic()
+
+```
+
+The development process for package aimed to tread the line between making things 'just work' and giving the accomplished user enough flexibility to use and modify any part of the model independently. In the spirit of doing the fun stuff first, this section will demonstrate the `run_model` function --- this is a complete, out-of-the-box soil carbon model which will give quick and painless carbon stock change estimates when passed data of the right kind.
+
+To help out here, the package also contains a small dataset of exactly the right kind, called `toy_input`:
+
+```{r toy-input-1}
+glimpse(toy_input)
+```
+
+It's an ordinary tibble, with one list column; this contains a list of nested climate data, each of dimensions 3 * 12:
+
+```{r toy-input-2}
+glimpse(toy_input$climdata[[1]])
+```
+
+Passed a dataset of this type, the `run_model` function will output results with no further input required:
+
+```{r toy-input-model-run}
+toy_input %>%
+  run_model() %>%
+  glimpse()
+```
+
+A great deal of intermediate calculations are generated and dropped when `run_model` executes with its default arguments; for more information on the model run process, and a better ability to interrogate the results, it's best to alter the default arguments a bit:
+
+```{r toy-input-model-run-full}
+toy_input %>%
+  run_model(drop_prelim = FALSE, drop_runin = FALSE) %>%
+  glimpse()
+```
+
+You can also choose whether or not to deal with the nested climate data inside or outside of the `run_model` function. This is useful primarily because the role of climate data varies with model usage --- where it might be important to have annually-specific climate datasets for one use-case, an annual average will do for another. This climate data is a multiplying factor for file size, so it's useful to not be forced to over-inflate a file through repetitions. Here's how this works:
+
+```{r toy-input-climdata-alternatives}
+# with automated climfac calculation
+x <- run_model(toy_input) # default calculate_climfacs = TRUE
+
+# with manual climfac calculation
+y <- toy_input %>%
+  mutate(
+    tfac = map_dbl(climdata, ~tfac(.x$temp)),
+    wfac = map_dbl(climdata, ~wfac(.x$precip, .x$pet))
+    ) %>%
+  run_model(calculate_climfacs = FALSE)
+```
+
+Here, `x` and `y` are identical datasets. Obviously, the `x` method is more efficient if you need every `climdata` object to be different, by the `y` method separates this operation from `run_model` in case you want to calculate `tfac` and `wfac` first, and repeat them over multiple datasets (say, perhaps, 10 different treatments in the same study site) before running the model.
+
+The `run_model` function also contains default arguments naming each of the individual parameters it requires from the `data` object --- it's anticipated these will be ignored 99.9% of the time, but they provide flexibility so you can modify the function behaviour rather than changing your data if you so desire.
+
+## Usage --- the input data setup functions
+
+The `toy_input` dataset we've been working with thus far contains exactly what the soil carbon model needs to know in order to make an estimate of soil C stocks; however, the type of information contained (e.g. carbon inputs, lignin fractions; run `?toy_input` for full descriptions of all the variables) is rarely readily available to most land managers. To help set up the model, this package also contains functions for processing the kind of information which a land manager is likely to know (e.g. crop yields, manure application rates) and converts it into an input that the model expects.
+
+To make this happen, the package has a two-tiered set of functions. The highest tier contains just one function, `build_soil_input` --- this function can take as many arguments as you care to pass it, and it expects the output of a set of second-tier helper functions to form these inputs. These functions are `add_crop` and `add_manure`. We will demonstrate these first:
+
+```{r add-things}
+
+crop1 <- add_crop(crop = "wheat", yield_tha = rep(7.2, 10), frac_remove = 0.3, frac_renew = 1)
+manure1 <- add_manure(livestock_type = "beef_cattle", n_rate = rep(100, 10))
+
+str(crop1)
+str(manure1)
+```
+
+These list objects are admittedly not very human-readable, but they aren't supposed to be. When passed to `build_soil_input`, the function maps an S3 method across the arguments list, and uses the information contained to make an estimate of the key parameters:
+
+```{r build-soil-input}
+build_soil_input(crop1, manure1) %>%
+  glimpse()
+```
+
+The output tibble is of correct format to provide the organic matter elements to a `run_model` input dataframe. Multiple manure applications --- or complex management strategies like cover cropping --- can be absorbed since `build_soil_input` has no expectations as to the number of arguments. Note also that the single-value (scalar) elements specified in `add_crop` and `add_manure` are recycled, and the output is 10 rows long, the same as the vector elements. If you pass vectors of different > 1 lengths to `build_soil_input`, it will pad the end of the shorter vectors with zeroes to enable it to continue, and warn you that you've probably/possibly made an error in your inputs.
+
+## Usage --- levelling up to multiple model runs
+
+Usually when you're running a model of this type, you want to do it more than once. Whether it's multiple years, multiple climate scenarios, multiple grid cells or multiple management scenarios, it's very unlikely you're going to be one-and-done with your modelling. With this in mind, this package has been designed to work as well as possible with `tidyverse`'s `purrr`, and the list-wise and nested-tibble operations this allows. All the functions --- and particularly `run_model` --- work well with lists and it is anticipated they will be used in this context.
+
+This post is not intended to be a tutorial on `purrr` (go [here](https://r4ds.had.co.nz/iteration.html) for that), so the best way to demonstrate is by example. The header plot for the `run_model` section of this post was built with the `toy_input` used to demonstrate the package, along with some random sampling and iteration with `purrr`.
+
+```{r front-matter-example, eval = FALSE}
+
+# function build 100-row dataset by replicating toy_input 10x
+build_fake_data <- function(data) {
+  map(1:10, ~data) %>%
+    bind_rows() %>%
+    mutate(year = 2001:2100,
+           mod_fac = seq(from = 1, to = runif(1, 0.5, 2), length.out = 100) + rnorm(100, 0, 0.02),
+           c_input = c_input * mod_fac,
+           till_type = ifelse(year > sample(2001:2100, 1), "reduced", till_type)) %>%
+    select(-mod_fac)
+}
+
+# build 10 fake datasets with random inputs
+set.seed(2065)
+fake_data <- map(1:10, ~build_fake_data(toy_input))
+
+# map run model across list
+output <- map(fake_data, run_model)
+
+# plot
+output %>%
+  set_names(paste0("run_", 1:10)) %>%
+  bind_rows(.id = "run") %>%
+  ggplot(aes(x = year, y = total_y, group = run)) +
+  geom_line(colour = "darkred",) +
+  labs(x = "Year",
+       y = expression("Soil C stocks, tonnes C ha"^{-1})) +
+  theme_classic()
+```
+
+## Package data
+
+The `toy_input` data used in the above examples is just the tip of the iceberg for package data. This section covers the data utilised in package functions, which is also made available to the user for information and modification if desired.
+
+### Soil carbon model parameters
+
+All functions which run under the wrapper function `run_model`, and this wrapper function itself, make use of a named list object containing model parameters. This object is passed to the final argument of each function, `params`. The default parameter list can be directly accessed by the user, and contains all parameters and accompanying descriptions:
+
+```{r model-parameters}
+head(soilc_params, 1)
+names(soilc_params)
+```
+
+If the user wishes to modify the default parameters, this list can be used as the basis for a custom model parameter object, and this passed to `run_model` or any of its core functions.
+
+### Soil input function parameters
+
+The setup for the model input data (`build_soil_inputs`) also requires a number of core datasets. These are made available to the user in the same way, and can be accessed under `crop_agrc` (above-ground residue coefficients), `crop_bgrc` (below-ground residue coefficients), `crop_fractions` (crop nitrogen and lignin fractions) and `man_fractions` (manure nitrogen and lignin fractions).
+
+The following may also be useful in determining possible arguments for `crop` and `livestock_type` in the `add_*` functions:
+
+```{r model-setup-data}
+names(crop_fractions)
+names(man_fractions)
+```
+
+## Acknowledgements
+
+Thanks to the Natural Environment Research Council, the Legumes Translated project, and the University of Edinburgh/Scotland's Rural College MSc programmes for providing the context, projects and requirements which led to the development of much of the code in this package. [Colin Gillespie](https://github.com/csgillespie) has been an incredible and approachable mentor, and his input to my coding generally has undoubtedly influenced the development of this package. The package is based around `tidyverse` ideas and functions, so thanks go also to Hadley Wickham and the `tidyverse` team for building and maintaining this incredible environment.
+
+## Contribute
+
+If you would like to contribute to this package, please file an issue, make a pull request on GitHub, or contact the author on Twitter [\@alasdair_sykes](https://twitter.com/alasdair_sykes) or by email at alasdair.sykes@sruc.ac.uk.
+

@@ -6,10 +6,19 @@
     <description>Recent content in tidyverse on Alasdair Sykes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 09 Aug 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 03 Jan 2021 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/tidyverse/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>soilc.ipcc --- a new R package for soil carbon modelling</title>
+      <link>/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/</link>
+      <pubDate>Sun, 03 Jan 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/</guid>
+      <description>I’ve built a new R package! After nearly a year of rehashing soil carbon modelling code across multiple projects, I finally found the time over the Christmas holidays (when else?) to properly document and contextualise it in a package. I am unapologetically borrowing from the vignette for this new package to form the bulk of this post, since the task of explaining myself intelligently is something I’m lucky to get right once.</description>
+    </item>
     
     <item>
       <title>Making an API call with R</title>
