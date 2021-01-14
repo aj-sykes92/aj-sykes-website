@@ -200,6 +200,9 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
   # Your favicon path, default is "/favicon.png"
   favicon = "images/favicon.ico"
+  
+  # rss limit
+  rssLimit = 10
 
   # Header configuration
   # The link at the right of the header is customizable

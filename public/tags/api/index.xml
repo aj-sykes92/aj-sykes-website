@@ -6,19 +6,143 @@
     <description>Recent content in API on Alasdair Sykes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 09 Aug 2020 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/tags/api/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 09 Aug 2020 00:00:00 +0000</lastBuildDate><atom:link href="/tags/api/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Making an API call with R</title>
       <link>/2020/08/making-an-api-call-with-r.en-us/</link>
       <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
       
       <guid>/2020/08/making-an-api-call-with-r.en-us/</guid>
-      <description>A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential — I’ll be posting plenty about that when it’s more mature — but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.
-In the past, I’ve used spatial data as the building blocks for many of the models I build, and it’s especially pertinent for solar-based models.</description>
+      <description>
+
+
+&lt;p&gt;A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential — I’ll be posting plenty about that when it’s more mature — but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.&lt;/p&gt;
+&lt;p&gt;In the past, I’ve used spatial data as the building blocks for many of the models I build, and it’s especially pertinent for solar-based models. For example, a spatially specific estimate of solar irradiation is pretty indispensible when it comes to making supportable estimates for the performance of solar tech. For the solar app, I want the user to be able to specify their location and receive output data specific to their local climatic conditions.&lt;/p&gt;
+&lt;p&gt;The easy solution for the app would be just to wrap up some raster data in .rds form and add it into the directory. However, that seems inelegant; apart from adding some fairly chunky files to the app bundle (think global coverage * 2–3 layers * 30-arc-second resolution * 12 months), it also means these have to be read in and out every time the app is loaded, slowing things down quite a bit. Inevitably, I’d end up making compromises — lower resolution for faster performance, skip a layer to avoid going over bundle size limits, etc.&lt;/p&gt;
+&lt;p&gt;After a bit of head-scratching and searching, I discovered the National Renewable Energy Laboratory’s &lt;a href=&#34;https://developer.nrel.gov/docs/solar/solar-resource-v1/&#34;&gt;Developer Network&lt;/a&gt;. NREL’s DN domain hosts a free application programming interface (API) allowing the user to query and retrieve solar-relevant data.&lt;/p&gt;
+&lt;p&gt;Before starting, it’s worth noting that many APIs have R packages built around them, making their use very straightforward — the &lt;code&gt;rtweet&lt;/code&gt; package is a mature (and very cool) example. Full disclosure here — I was originally going to do this blog post for the UK postcodes API hosted at &lt;a href=&#34;http://api.postcodes.io/postcodes/&#34; class=&#34;uri&#34;&gt;http://api.postcodes.io/postcodes/&lt;/a&gt; (also used in my app), and got fully halfway into it before realising that there’s already an R package built for this, documented &lt;a href=&#34;http://walczak.org/2016/07/postcode-and-geolocation-api-for-the-uk/&#34;&gt;here&lt;/a&gt;. By contrast, the NREL API doesn’t have its own R package, but it’s very straightforward to knock together your own call. We’re going to use the &lt;code&gt;httr&lt;/code&gt; and &lt;code&gt;jsonlite&lt;/code&gt; packages to pull the call together.&lt;/p&gt;
+&lt;p&gt;Based on documentation from the &lt;a href=&#34;https://developer.nrel.gov/docs/solar/solar-resource-v1/&#34;&gt;API homepage&lt;/a&gt;, we can see that the URL required for the API takes this format:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;https://developer.nrel.gov/api/solar/solar_resource/v1.json?api_key=DEMO_KEY&amp;amp;lat=40&amp;amp;lon=-105&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Breaking that down, the parts of interest are &lt;code&gt;.json&lt;/code&gt;, indicating the file return format (.xml is also an option, but with &lt;code&gt;jsonlite&lt;/code&gt; available, .json is definitely my preference), &lt;code&gt;api_key=DEMO_KEY&lt;/code&gt;, giving me space for authentication, and the &lt;code&gt;lat&lt;/code&gt;/&lt;code&gt;lon&lt;/code&gt; entries, giving me space to supply my query data.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; To dissuade the internet from borrowing my API key (though it’s free to get — signup is &lt;a href=&#34;https://developer.nrel.gov/signup/&#34;&gt;here&lt;/a&gt;), I’ve built a function which returns the key in a separate (non-tracked script), and I source that first before building. Here’s what that code looks like:&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# example function
+api_key &amp;lt;- function() return(&amp;quot;some_api_key&amp;quot;)
+
+# overwrite with function returning actual key
+source(&amp;quot;private/nrel-api-key.R&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;That done, here’s a simple &lt;code&gt;paste0&lt;/code&gt; based method to knock that call together. For location, I’m going to use the example lat/lon documented on the NREL developer page, which looks to be just north of Denver, Colorado, USA.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;base &amp;lt;- &amp;quot;https://developer.nrel.gov/api/solar/solar_resource/v1.json?api_key=&amp;quot;
+lat &amp;lt;- 40
+lon &amp;lt;- -105
+loc &amp;lt;- paste0(&amp;quot;&amp;amp;lat=&amp;quot;, lat, &amp;quot;&amp;amp;lon=&amp;quot;, lon)
+
+api_call &amp;lt;- paste0(base, api_key(), loc)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we’ll use &lt;code&gt;GET&lt;/code&gt; and &lt;code&gt;content&lt;/code&gt; from the &lt;code&gt;httr&lt;/code&gt; package to make and interpret the call:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# make call
+result &amp;lt;- httr::GET(api_call)
+
+# extract text
+result_text &amp;lt;- httr::content(result, as = &amp;quot;text&amp;quot;)
+
+print(result_text)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;{\&amp;quot;version\&amp;quot;:\&amp;quot;1.0.0\&amp;quot;,\&amp;quot;warnings\&amp;quot;:[],\&amp;quot;errors\&amp;quot;:[],\&amp;quot;metadata\&amp;quot;:{\&amp;quot;sources\&amp;quot;:[\&amp;quot;Perez-SUNY/NREL, 2012\&amp;quot;]},\&amp;quot;inputs\&amp;quot;:{\&amp;quot;lat\&amp;quot;:\&amp;quot;40\&amp;quot;,\&amp;quot;lon\&amp;quot;:\&amp;quot;-105\&amp;quot;},\&amp;quot;outputs\&amp;quot;:{\&amp;quot;avg_dni\&amp;quot;:{\&amp;quot;annual\&amp;quot;:6.06,\&amp;quot;monthly\&amp;quot;:{\&amp;quot;jan\&amp;quot;:5.0,\&amp;quot;feb\&amp;quot;:5.34,\&amp;quot;mar\&amp;quot;:5.94,\&amp;quot;apr\&amp;quot;:6.11,\&amp;quot;may\&amp;quot;:6.36,\&amp;quot;jun\&amp;quot;:7.43,\&amp;quot;jul\&amp;quot;:7.48,\&amp;quot;aug\&amp;quot;:6.65,\&amp;quot;sep\&amp;quot;:6.81,\&amp;quot;oct\&amp;quot;:5.82,\&amp;quot;nov\&amp;quot;:5.11,\&amp;quot;dec\&amp;quot;:4.67}},\&amp;quot;avg_ghi\&amp;quot;:{\&amp;quot;annual\&amp;quot;:4.81,\&amp;quot;monthly\&amp;quot;:{\&amp;quot;jan\&amp;quot;:2.5,\&amp;quot;feb\&amp;quot;:3.43,\&amp;quot;mar\&amp;quot;:4.69,\&amp;quot;apr\&amp;quot;:5.69,\&amp;quot;may\&amp;quot;:6.6,\&amp;quot;jun\&amp;quot;:7.25,\&amp;quot;jul\&amp;quot;:7.14,\&amp;quot;aug\&amp;quot;:6.24,\&amp;quot;sep\&amp;quot;:5.35,\&amp;quot;oct\&amp;quot;:3.85,\&amp;quot;nov\&amp;quot;:2.75,\&amp;quot;dec\&amp;quot;:2.19}},\&amp;quot;avg_lat_tilt\&amp;quot;:{\&amp;quot;annual\&amp;quot;:5.82,\&amp;quot;monthly\&amp;quot;:{\&amp;quot;jan\&amp;quot;:4.79,\&amp;quot;feb\&amp;quot;:5.4,\&amp;quot;mar\&amp;quot;:6.07,\&amp;quot;apr\&amp;quot;:6.11,\&amp;quot;may\&amp;quot;:6.25,\&amp;quot;jun\&amp;quot;:6.47,\&amp;quot;jul\&amp;quot;:6.58,\&amp;quot;aug\&amp;quot;:6.44,\&amp;quot;sep\&amp;quot;:6.53,\&amp;quot;oct\&amp;quot;:5.71,\&amp;quot;nov\&amp;quot;:4.99,\&amp;quot;dec\&amp;quot;:4.47}}}}&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Looks like we’ve got something there, but it’s not very helpfully structured. If you were to paste that into a text file and save it with the .json extension, a text editor which recognises the filetype would format it much more nicely for you. However, we’re interested in getting the data in usable form, so it’s time to bring in &lt;code&gt;jsonlite&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# convert from .json to list
+result_list &amp;lt;- jsonlite::fromJSON(result_text, flatten = TRUE)
+
+# main results list structure
+names(result_list)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;version&amp;quot;  &amp;quot;warnings&amp;quot; &amp;quot;errors&amp;quot;   &amp;quot;metadata&amp;quot; &amp;quot;inputs&amp;quot;   &amp;quot;outputs&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# let&amp;#39;s see what we&amp;#39;ve got for outputs
+str(result_list$outputs)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## List of 3
+##  $ avg_dni     :List of 2
+##   ..$ annual : num 6.06
+##   ..$ monthly:List of 12
+##   .. ..$ jan: num 5
+##   .. ..$ feb: num 5.34
+##   .. ..$ mar: num 5.94
+##   .. ..$ apr: num 6.11
+##   .. ..$ may: num 6.36
+##   .. ..$ jun: num 7.43
+##   .. ..$ jul: num 7.48
+##   .. ..$ aug: num 6.65
+##   .. ..$ sep: num 6.81
+##   .. ..$ oct: num 5.82
+##   .. ..$ nov: num 5.11
+##   .. ..$ dec: num 4.67
+##  $ avg_ghi     :List of 2
+##   ..$ annual : num 4.81
+##   ..$ monthly:List of 12
+##   .. ..$ jan: num 2.5
+##   .. ..$ feb: num 3.43
+##   .. ..$ mar: num 4.69
+##   .. ..$ apr: num 5.69
+##   .. ..$ may: num 6.6
+##   .. ..$ jun: num 7.25
+##   .. ..$ jul: num 7.14
+##   .. ..$ aug: num 6.24
+##   .. ..$ sep: num 5.35
+##   .. ..$ oct: num 3.85
+##   .. ..$ nov: num 2.75
+##   .. ..$ dec: num 2.19
+##  $ avg_lat_tilt:List of 2
+##   ..$ annual : num 5.82
+##   ..$ monthly:List of 12
+##   .. ..$ jan: num 4.79
+##   .. ..$ feb: num 5.4
+##   .. ..$ mar: num 6.07
+##   .. ..$ apr: num 6.11
+##   .. ..$ may: num 6.25
+##   .. ..$ jun: num 6.47
+##   .. ..$ jul: num 6.58
+##   .. ..$ aug: num 6.44
+##   .. ..$ sep: num 6.53
+##   .. ..$ oct: num 5.71
+##   .. ..$ nov: num 4.99
+##   .. ..$ dec: num 4.47&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Very nice, and a lot more usable than the raw .json. As a final flourish, let’s use a bit of &lt;code&gt;dplyr&lt;/code&gt; and &lt;code&gt;purrr&lt;/code&gt; to wrangle that list into a nice tidy dataframe (I’m just going to load the full &lt;code&gt;tidyverse&lt;/code&gt; here since I’m lazy).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
+
+# extract outputs
+output &amp;lt;- result_list$output
+
+# convert list output field to tidy df
+output_df &amp;lt;- output %&amp;gt;%
+  map_dfr(~.x$monthly) %&amp;gt;% # return row-wise data frame bind
+  mutate(metric = names(output)) %&amp;gt;% # add names
+  gather(-metric, key = &amp;quot;month&amp;quot;, value = &amp;quot;value&amp;quot;)
+
+glimpse(output_df)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 36
+## Columns: 3
+## $ metric &amp;lt;chr&amp;gt; &amp;quot;avg_dni&amp;quot;, &amp;quot;avg_ghi&amp;quot;, &amp;quot;avg_lat_tilt&amp;quot;, &amp;quot;avg_dni&amp;quot;, &amp;quot;avg_ghi&amp;quot;, &amp;quot;a…
+## $ month  &amp;lt;chr&amp;gt; &amp;quot;jan&amp;quot;, &amp;quot;jan&amp;quot;, &amp;quot;jan&amp;quot;, &amp;quot;feb&amp;quot;, &amp;quot;feb&amp;quot;, &amp;quot;feb&amp;quot;, &amp;quot;mar&amp;quot;, &amp;quot;mar&amp;quot;, &amp;quot;mar&amp;quot;,…
+## $ value  &amp;lt;dbl&amp;gt; 5.00, 2.50, 4.79, 5.34, 3.43, 5.40, 5.94, 4.69, 6.07, 6.11, 5.…&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;That about does it. This has been a code-heavy and visualisation-light post, so let’s finish on a plot for style points.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;long_metric &amp;lt;- tibble(metric = c(&amp;quot;avg_dni&amp;quot;, &amp;quot;avg_ghi&amp;quot;, &amp;quot;avg_lat_tilt&amp;quot;),
+                      long = c(&amp;quot;Direct normal irradiation&amp;quot;,
+                               &amp;quot;Global horizontal irradiation&amp;quot;,
+                               &amp;quot;Average tilt at latitude&amp;quot;))
+
+output_df %&amp;gt;%
+  mutate(date = lubridate::dmy(paste0(&amp;quot;01-&amp;quot;, month, &amp;quot;-14&amp;quot;))) %&amp;gt;%
+  left_join(long_metric, by = &amp;quot;metric&amp;quot;) %&amp;gt;%
+  ggplot(aes(x = date, y = value, colour = long)) +
+  scale_x_date(date_labels = &amp;quot;%b&amp;quot;, date_breaks = &amp;quot;3 months&amp;quot;) +
+  labs(x = &amp;quot;&amp;quot;,
+       y = expression(&amp;quot;Solar insolation (kWh m&amp;quot;^{-2}*&amp;quot; day&amp;quot;^{-1}*&amp;quot;)&amp;quot;),
+       colour = &amp;quot;&amp;quot;,
+       title = &amp;quot;Monthly solar insolation&amp;quot;,
+       subtitle = paste0(&amp;quot;lat = &amp;quot;, lat, &amp;quot;, lon = &amp;quot;, lon)) +
+  geom_line() +
+  theme_classic() +
+  theme(legend.position = &amp;quot;bottom&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-08-09-making-an-api-call-with-r.en-us_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Thanks for reading!&lt;/p&gt;
+</description>
     </item>
     
   </channel>

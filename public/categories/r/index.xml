@@ -6,18 +6,243 @@
     <description>Recent content in R on Alasdair Sykes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 03 Jan 2021 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 03 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>soilc.ipcc --- a new R package for soil carbon modelling</title>
       <link>/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/</link>
       <pubDate>Sun, 03 Jan 2021 00:00:00 +0000</pubDate>
       
       <guid>/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/</guid>
-      <description>I’ve built a new R package! After nearly a year of rehashing soil carbon modelling code across multiple projects, I finally found the time over the Christmas holidays (when else?) to properly document and contextualise it in a package. I am unapologetically borrowing from the vignette for this new package to form the bulk of this post, since the task of explaining myself intelligently is something I’m lucky to get right once.</description>
+      <description>
+
+
+&lt;blockquote&gt;
+&lt;p&gt;I’ve built a new R package! After nearly a year of rehashing soil carbon modelling code across multiple projects, I finally found the time over the Christmas holidays (when else?) to properly document and contextualise it in a package. I am unapologetically borrowing from the vignette for this new package to form the bulk of this post, since the task of explaining myself intelligently is something I’m lucky to get right once.
+Find the source code for the package &lt;a href=&#34;https://github.com/aj-sykes92/soilc.ipcc&#34;&gt;here&lt;/a&gt;. Ok — the rest of this post is basically a vignette. Enjoy!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div id=&#34;soil-carbon-modelling-in-a-tidyverse-environment-why&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Soil carbon modelling in a &lt;code&gt;tidyverse&lt;/code&gt; environment — why?&lt;/h2&gt;
+&lt;p&gt;Soil carbon is currently one of the most studied and debated topics in the field of agriculture and climate change. Like much which occurs on the boundary of human management and biophysical systems, it’s also extremely challenging to measure or model accurately. To get practical answers to land managers, academics typically need to rely either on simple, empirically calibrated methods, or on highly complex process-based models. Both methods have drawbacks; the former is imprecise, the latter time-consuming, and both are difficult to extrapolate. Finding some middle ground, the Intergovernmental Panel on Climate Change recently (June 2019) released a simplified, globally calibrated three-pool process-based soil carbon model, along with accompanying empirical methods to estimate the required input parameters. The full details of this model are given on the homepage of the &lt;a href=&#34;https://www.ipcc-nggip.iges.or.jp/public/2019rf/vol4.html&#34;&gt;2019 Refinement to the 2006 IPCC Guidelines for
+National Greenhouse Gas Inventories&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This package ties all of this information together in an easy-to-use, flexible model implementation which works from start to end of the modelling process — beginning with management information, ending with a soil carbon stock estimate — and which can be run as a seamless part of a &lt;code&gt;tidyverse&lt;/code&gt;-based workflow.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Disclaimer:&lt;/strong&gt; This package is entirely the creation of its author, and no warranty is given or implied as to its use, or to its fidelity to the modelling framework it represents (with that said, my intention is to reproduce this framework faithfully, so if you notice any errors or omissions, please let me know)!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div id=&#34;installation&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Installation&lt;/h2&gt;
+&lt;p&gt;This package is hosted on Github and can be installed using the &lt;code&gt;devtools&lt;/code&gt; package:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# install.packages(&amp;quot;devtools&amp;quot;)
+devtools::install_github(&amp;quot;aj-sykes92/soilc.ipcc&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note: If this doesn’t work, update &lt;code&gt;devtools&lt;/code&gt;, as Github recently changed the term it uses for the primary version of a source code repository.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div id=&#34;usage-run_model&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Usage — &lt;code&gt;run_model&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2021-01-03-a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us_files/figure-html/front-matter-1.png&#34; width=&#34;960&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The development process for package aimed to tread the line between making things ‘just work’ and giving the accomplished user enough flexibility to use and modify any part of the model independently. In the spirit of doing the fun stuff first, this section will demonstrate the &lt;code&gt;run_model&lt;/code&gt; function — this is a complete, out-of-the-box soil carbon model which will give quick and painless carbon stock change estimates when passed data of the right kind.&lt;/p&gt;
+&lt;p&gt;To help out here, the package also contains a small dataset of exactly the right kind, called &lt;code&gt;toy_input&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;glimpse(toy_input)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 10
+## Columns: 7
+## $ year        &amp;lt;int&amp;gt; 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020
+## $ climdata    &amp;lt;list&amp;gt; [&amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;…
+## $ c_input     &amp;lt;dbl&amp;gt; 5.298971, 4.945811, 5.326737, 4.754702, 4.488324, 4.85921…
+## $ lignin_frac &amp;lt;dbl&amp;gt; 0.005905677, 0.006083535, 0.006065450, 0.005974941, 0.005…
+## $ n_frac      &amp;lt;dbl&amp;gt; 0.05013271, 0.04963280, 0.05039613, 0.05054946, 0.0500886…
+## $ sand_frac   &amp;lt;dbl&amp;gt; 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43
+## $ till_type   &amp;lt;chr&amp;gt; &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;…&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It’s an ordinary tibble, with one list column; this contains a list of nested climate data, each of dimensions 3 * 12:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;glimpse(toy_input$climdata[[1]])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 12
+## Columns: 3
+## $ temp   &amp;lt;dbl&amp;gt; 14.10027, 17.39389, 17.59273, 15.41833, 15.20850, 16.24473, 17…
+## $ precip &amp;lt;dbl&amp;gt; 53.39583, 58.48306, 55.08518, 57.16217, 53.38465, 52.36533, 55…
+## $ pet    &amp;lt;dbl&amp;gt; 46.52958, 43.81984, 42.76176, 44.95919, 44.06107, 40.87934, 44…&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Passed a dataset of this type, the &lt;code&gt;run_model&lt;/code&gt; function will output results with no further input required:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;toy_input %&amp;gt;%
+  run_model() %&amp;gt;%
+  glimpse()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 10
+## Columns: 14
+## $ year           &amp;lt;int&amp;gt; 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, …
+## $ c_input        &amp;lt;dbl&amp;gt; 5.298971, 4.945811, 5.326737, 4.754702, 4.488324, 4.85…
+## $ lignin_frac    &amp;lt;dbl&amp;gt; 0.005905677, 0.006083535, 0.006065450, 0.005974941, 0.…
+## $ n_frac         &amp;lt;dbl&amp;gt; 0.05013271, 0.04963280, 0.05039613, 0.05054946, 0.0500…
+## $ sand_frac      &amp;lt;dbl&amp;gt; 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, …
+## $ till_type      &amp;lt;chr&amp;gt; &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;…
+## $ tfac           &amp;lt;dbl&amp;gt; 0.5189817, 0.4939976, 0.4878877, 0.4758409, 0.4754930,…
+## $ wfac           &amp;lt;dbl&amp;gt; 2.223240, 2.175849, 2.226038, 2.194289, 2.171587, 2.20…
+## $ climdata       &amp;lt;list&amp;gt; [&amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12 x 3]&amp;gt;…
+## $ active_y       &amp;lt;dbl&amp;gt; 0.1820583, 0.1823888, 0.1944128, 0.1805120, 0.1723055,…
+## $ slow_y         &amp;lt;dbl&amp;gt; 1.694165, 1.692363, 1.768588, 1.705763, 1.634969, 1.69…
+## $ passive_y      &amp;lt;dbl&amp;gt; 37.39614, 37.39293, 37.40793, 37.40198, 37.38430, 37.3…
+## $ total_y        &amp;lt;dbl&amp;gt; 39.27237, 39.26768, 39.37093, 39.28825, 39.19157, 39.2…
+## $ c_stock_change &amp;lt;dbl&amp;gt; -0.023740126, -0.004686108, 0.103255479, -0.082681955,…&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;A great deal of intermediate calculations are generated and dropped when &lt;code&gt;run_model&lt;/code&gt; executes with its default arguments; for more information on the model run process, and a better ability to interrogate the results, it’s best to alter the default arguments a bit:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;toy_input %&amp;gt;%
+  run_model(drop_prelim = FALSE, drop_runin = FALSE) %&amp;gt;%
+  glimpse()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 11
+## Columns: 22
+## $ year           &amp;lt;int&amp;gt; NA, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 20…
+## $ c_input        &amp;lt;dbl&amp;gt; 4.958704, 5.298971, 4.945811, 5.326737, 4.754702, 4.48…
+## $ lignin_frac    &amp;lt;dbl&amp;gt; 0.006005288, 0.005905677, 0.006083535, 0.006065450, 0.…
+## $ n_frac         &amp;lt;dbl&amp;gt; 0.05024811, 0.05013271, 0.04963280, 0.05039613, 0.0505…
+## $ sand_frac      &amp;lt;dbl&amp;gt; 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, …
+## $ till_type      &amp;lt;chr&amp;gt; &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;…
+## $ tfac           &amp;lt;dbl&amp;gt; 0.4850891, 0.5189817, 0.4939976, 0.4878877, 0.4758409,…
+## $ wfac           &amp;lt;dbl&amp;gt; 2.195574, 2.223240, 2.175849, 2.226038, 2.194289, 2.17…
+## $ climdata       &amp;lt;list&amp;gt; [NULL, &amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12…
+## $ tillfac        &amp;lt;dbl&amp;gt; 3.036, 3.036, 3.036, 3.036, 3.036, 3.036, 3.036, 3.036…
+## $ alpha          &amp;lt;dbl&amp;gt; 2.528185, 2.701829, 2.521510, 2.715727, 2.424212, 2.28…
+## $ k_a            &amp;lt;dbl&amp;gt; 13.69867, 14.84046, 13.82492, 13.96887, 13.42965, 13.2…
+## $ k_s            &amp;lt;dbl&amp;gt; 0.6757991, 0.7321271, 0.6820271, 0.6891289, 0.6625271,…
+## $ k_p            &amp;lt;dbl&amp;gt; 0.007338187, 0.007949827, 0.007405814, 0.007482929, 0.…
+## $ active_y_ss    &amp;lt;dbl&amp;gt; 0.1845569, 0.1820583, 0.1823888, 0.1944128, 0.1805120,…
+## $ slow_y_ss      &amp;lt;dbl&amp;gt; 1.711369, 1.687870, 1.691523, 1.802973, 1.673761, 1.59…
+## $ passive_y_ss   &amp;lt;dbl&amp;gt; 37.40018, 36.89231, 36.96202, 39.39844, 36.58002, 34.9…
+## $ active_y       &amp;lt;dbl&amp;gt; 0.1845569, 0.1820583, 0.1823888, 0.1944128, 0.1805120,…
+## $ slow_y         &amp;lt;dbl&amp;gt; 1.711369, 1.694165, 1.692363, 1.768588, 1.705763, 1.63…
+## $ passive_y      &amp;lt;dbl&amp;gt; 37.40018, 37.39614, 37.39293, 37.40793, 37.40198, 37.3…
+## $ total_y        &amp;lt;dbl&amp;gt; 39.29611, 39.27237, 39.26768, 39.37093, 39.28825, 39.1…
+## $ c_stock_change &amp;lt;dbl&amp;gt; 0.000000000, -0.023740126, -0.004686108, 0.103255479, …&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can also choose whether or not to deal with the nested climate data inside or outside of the &lt;code&gt;run_model&lt;/code&gt; function. This is useful primarily because the role of climate data varies with model usage — where it might be important to have annually-specific climate datasets for one use-case, an annual average will do for another. This climate data is a multiplying factor for file size, so it’s useful to not be forced to over-inflate a file through repetitions. Here’s how this works:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# with automated climfac calculation
+x &amp;lt;- run_model(toy_input) # default calculate_climfacs = TRUE
+
+# with manual climfac calculation
+y &amp;lt;- toy_input %&amp;gt;%
+  mutate(
+    tfac = map_dbl(climdata, ~tfac(.x$temp)),
+    wfac = map_dbl(climdata, ~wfac(.x$precip, .x$pet))
+    ) %&amp;gt;%
+  run_model(calculate_climfacs = FALSE)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here, &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are identical datasets. Obviously, the &lt;code&gt;x&lt;/code&gt; method is more efficient if you need every &lt;code&gt;climdata&lt;/code&gt; object to be different, by the &lt;code&gt;y&lt;/code&gt; method separates this operation from &lt;code&gt;run_model&lt;/code&gt; in case you want to calculate &lt;code&gt;tfac&lt;/code&gt; and &lt;code&gt;wfac&lt;/code&gt; first, and repeat them over multiple datasets (say, perhaps, 10 different treatments in the same study site) before running the model.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;run_model&lt;/code&gt; function also contains default arguments naming each of the individual parameters it requires from the &lt;code&gt;data&lt;/code&gt; object — it’s anticipated these will be ignored 99.9% of the time, but they provide flexibility so you can modify the function behaviour rather than changing your data if you so desire.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;usage-the-input-data-setup-functions&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Usage — the input data setup functions&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;toy_input&lt;/code&gt; dataset we’ve been working with thus far contains exactly what the soil carbon model needs to know in order to make an estimate of soil C stocks; however, the type of information contained (e.g. carbon inputs, lignin fractions; run &lt;code&gt;?toy_input&lt;/code&gt; for full descriptions of all the variables) is rarely readily available to most land managers. To help set up the model, this package also contains functions for processing the kind of information which a land manager is likely to know (e.g. crop yields, manure application rates) and converts it into an input that the model expects.&lt;/p&gt;
+&lt;p&gt;To make this happen, the package has a two-tiered set of functions. The highest tier contains just one function, &lt;code&gt;build_soil_input&lt;/code&gt; — this function can take as many arguments as you care to pass it, and it expects the output of a set of second-tier helper functions to form these inputs. These functions are &lt;code&gt;add_crop&lt;/code&gt; and &lt;code&gt;add_manure&lt;/code&gt;. We will demonstrate these first:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;crop1 &amp;lt;- add_crop(crop = &amp;quot;wheat&amp;quot;, yield_tha = rep(7.2, 10), frac_remove = 0.3, frac_renew = 1)
+manure1 &amp;lt;- add_manure(livestock_type = &amp;quot;beef_cattle&amp;quot;, n_rate = rep(100, 10))
+
+str(crop1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## List of 4
+##  $ crop       : chr &amp;quot;wheat&amp;quot;
+##  $ yield_tha  : num [1:10] 7.2 7.2 7.2 7.2 7.2 7.2 7.2 7.2 7.2 7.2
+##  $ frac_remove: num 0.3
+##  $ frac_renew : num 1
+##  - attr(*, &amp;quot;class&amp;quot;)= chr [1:2] &amp;quot;crop&amp;quot; &amp;quot;list&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;str(manure1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## List of 2
+##  $ livestock_type: chr &amp;quot;beef_cattle&amp;quot;
+##  $ n_rate        : num [1:10] 100 100 100 100 100 100 100 100 100 100
+##  - attr(*, &amp;quot;class&amp;quot;)= chr [1:2] &amp;quot;manure&amp;quot; &amp;quot;list&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;These list objects are admittedly not very human-readable, but they aren’t supposed to be. When passed to &lt;code&gt;build_soil_input&lt;/code&gt;, the function maps an S3 method across the arguments list, and uses the information contained to make an estimate of the key parameters:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;build_soil_input(crop1, manure1) %&amp;gt;%
+  glimpse()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 10
+## Columns: 6
+## $ om_input     &amp;lt;dbl&amp;gt; 15.71912, 15.71912, 15.71912, 15.71912, 15.71912, 15.719…
+## $ c_input      &amp;lt;dbl&amp;gt; 6.675944, 6.675944, 6.675944, 6.675944, 6.675944, 6.6759…
+## $ n_input      &amp;lt;dbl&amp;gt; 0.1790305, 0.1790305, 0.1790305, 0.1790305, 0.1790305, 0…
+## $ lignin_input &amp;lt;dbl&amp;gt; 0.9939831, 0.9939831, 0.9939831, 0.9939831, 0.9939831, 0…
+## $ n_frac       &amp;lt;dbl&amp;gt; 0.01138935, 0.01138935, 0.01138935, 0.01138935, 0.011389…
+## $ lignin_frac  &amp;lt;dbl&amp;gt; 0.063234, 0.063234, 0.063234, 0.063234, 0.063234, 0.0632…&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The output tibble is of correct format to provide the organic matter elements to a &lt;code&gt;run_model&lt;/code&gt; input dataframe. Multiple manure applications — or complex management strategies like cover cropping — can be absorbed since &lt;code&gt;build_soil_input&lt;/code&gt; has no expectations as to the number of arguments. Note also that the single-value (scalar) elements specified in &lt;code&gt;add_crop&lt;/code&gt; and &lt;code&gt;add_manure&lt;/code&gt; are recycled, and the output is 10 rows long, the same as the vector elements. If you pass vectors of different &amp;gt; 1 lengths to &lt;code&gt;build_soil_input&lt;/code&gt;, it will pad the end of the shorter vectors with zeroes to enable it to continue, and warn you that you’ve probably/possibly made an error in your inputs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;usage-levelling-up-to-multiple-model-runs&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Usage — levelling up to multiple model runs&lt;/h2&gt;
+&lt;p&gt;Usually when you’re running a model of this type, you want to do it more than once. Whether it’s multiple years, multiple climate scenarios, multiple grid cells or multiple management scenarios, it’s very unlikely you’re going to be one-and-done with your modelling. With this in mind, this package has been designed to work as well as possible with &lt;code&gt;tidyverse&lt;/code&gt;’s &lt;code&gt;purrr&lt;/code&gt;, and the list-wise and nested-tibble operations this allows. All the functions — and particularly &lt;code&gt;run_model&lt;/code&gt; — work well with lists and it is anticipated they will be used in this context.&lt;/p&gt;
+&lt;p&gt;This post is not intended to be a tutorial on &lt;code&gt;purrr&lt;/code&gt; (go &lt;a href=&#34;https://r4ds.had.co.nz/iteration.html&#34;&gt;here&lt;/a&gt; for that), so the best way to demonstrate is by example. The header plot for the &lt;code&gt;run_model&lt;/code&gt; section of this post was built with the &lt;code&gt;toy_input&lt;/code&gt; used to demonstrate the package, along with some random sampling and iteration with &lt;code&gt;purrr&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# function build 100-row dataset by replicating toy_input 10x
+build_fake_data &amp;lt;- function(data) {
+  map(1:10, ~data) %&amp;gt;%
+    bind_rows() %&amp;gt;%
+    mutate(year = 2001:2100,
+           mod_fac = seq(from = 1, to = runif(1, 0.5, 2), length.out = 100) + rnorm(100, 0, 0.02),
+           c_input = c_input * mod_fac,
+           till_type = ifelse(year &amp;gt; sample(2001:2100, 1), &amp;quot;reduced&amp;quot;, till_type)) %&amp;gt;%
+    select(-mod_fac)
+}
+
+# build 10 fake datasets with random inputs
+set.seed(2065)
+fake_data &amp;lt;- map(1:10, ~build_fake_data(toy_input))
+
+# map run model across list
+output &amp;lt;- map(fake_data, run_model)
+
+# plot
+output %&amp;gt;%
+  set_names(paste0(&amp;quot;run_&amp;quot;, 1:10)) %&amp;gt;%
+  bind_rows(.id = &amp;quot;run&amp;quot;) %&amp;gt;%
+  ggplot(aes(x = year, y = total_y, group = run)) +
+  geom_line(colour = &amp;quot;darkred&amp;quot;,) +
+  labs(x = &amp;quot;Year&amp;quot;,
+       y = expression(&amp;quot;Soil C stocks, tonnes C ha&amp;quot;^{-1})) +
+  theme_classic()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;package-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Package data&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;toy_input&lt;/code&gt; data used in the above examples is just the tip of the iceberg for package data. This section covers the data utilised in package functions, which is also made available to the user for information and modification if desired.&lt;/p&gt;
+&lt;div id=&#34;soil-carbon-model-parameters&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Soil carbon model parameters&lt;/h3&gt;
+&lt;p&gt;All functions which run under the wrapper function &lt;code&gt;run_model&lt;/code&gt;, and this wrapper function itself, make use of a named list object containing model parameters. This object is passed to the final argument of each function, &lt;code&gt;params&lt;/code&gt;. The default parameter list can be directly accessed by the user, and contains all parameters and accompanying descriptions:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(soilc_params, 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## $tillfac_ft
+## $tillfac_ft$be
+## [1] 3.036
+## 
+## $tillfac_ft$sd
+## [1] 0.579
+## 
+## $tillfac_ft$min
+## [1] 1.4
+## 
+## $tillfac_ft$max
+## [1] 4
+## 
+## $tillfac_ft$desc
+## [1] &amp;quot;Tillage disturbance modifier for decay rates under full tillage&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;names(soilc_params)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  [1] &amp;quot;tillfac_ft&amp;quot; &amp;quot;tillfac_rt&amp;quot; &amp;quot;tillfac_nt&amp;quot; &amp;quot;wfacpar1&amp;quot;   &amp;quot;wfacpar2&amp;quot;  
+##  [6] &amp;quot;wfacpar3&amp;quot;   &amp;quot;kfaca&amp;quot;      &amp;quot;k3par1&amp;quot;     &amp;quot;k3par2&amp;quot;     &amp;quot;kfacs&amp;quot;     
+## [11] &amp;quot;kfacp&amp;quot;      &amp;quot;f1&amp;quot;         &amp;quot;f2&amp;quot;         &amp;quot;f2_ft&amp;quot;      &amp;quot;f2_rt&amp;quot;     
+## [16] &amp;quot;f2_nt&amp;quot;      &amp;quot;f3&amp;quot;         &amp;quot;f4par1&amp;quot;     &amp;quot;f4par2&amp;quot;     &amp;quot;f5&amp;quot;        
+## [21] &amp;quot;f6&amp;quot;         &amp;quot;f7&amp;quot;         &amp;quot;f8&amp;quot;         &amp;quot;ta&amp;quot;         &amp;quot;tb&amp;quot;        
+## [26] &amp;quot;tmax&amp;quot;       &amp;quot;topt&amp;quot;       &amp;quot;sp1&amp;quot;        &amp;quot;sp2&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If the user wishes to modify the default parameters, this list can be used as the basis for a custom model parameter object, and this passed to &lt;code&gt;run_model&lt;/code&gt; or any of its core functions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;soil-input-function-parameters&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Soil input function parameters&lt;/h3&gt;
+&lt;p&gt;The setup for the model input data (&lt;code&gt;build_soil_inputs&lt;/code&gt;) also requires a number of core datasets. These are made available to the user in the same way, and can be accessed under &lt;code&gt;crop_agrc&lt;/code&gt; (above-ground residue coefficients), &lt;code&gt;crop_bgrc&lt;/code&gt; (below-ground residue coefficients), &lt;code&gt;crop_fractions&lt;/code&gt; (crop nitrogen and lignin fractions) and &lt;code&gt;man_fractions&lt;/code&gt; (manure nitrogen and lignin fractions).&lt;/p&gt;
+&lt;p&gt;The following may also be useful in determining possible arguments for &lt;code&gt;crop&lt;/code&gt; and &lt;code&gt;livestock_type&lt;/code&gt; in the &lt;code&gt;add_*&lt;/code&gt; functions:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;names(crop_fractions)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  [1] &amp;quot;alfalfa&amp;quot;             &amp;quot;barley&amp;quot;              &amp;quot;beans_and_pulses&amp;quot;   
+##  [4] &amp;quot;grass&amp;quot;               &amp;quot;grass_clover_mix&amp;quot;    &amp;quot;maize&amp;quot;              
+##  [7] &amp;quot;millet&amp;quot;              &amp;quot;n_fixing_forage&amp;quot;     &amp;quot;non_legume_hay&amp;quot;     
+## [10] &amp;quot;non_n_fixing_forage&amp;quot; &amp;quot;oats&amp;quot;                &amp;quot;peanut&amp;quot;             
+## [13] &amp;quot;potato&amp;quot;              &amp;quot;rice&amp;quot;                &amp;quot;rye&amp;quot;                
+## [16] &amp;quot;sorghum&amp;quot;             &amp;quot;soybean&amp;quot;             &amp;quot;spring_wheat&amp;quot;       
+## [19] &amp;quot;tubers&amp;quot;              &amp;quot;wheat&amp;quot;               &amp;quot;winter_wheat&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;names(man_fractions)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;dairy_cattle&amp;quot; &amp;quot;beef_cattle&amp;quot;  &amp;quot;poultry&amp;quot;      &amp;quot;swine&amp;quot;        &amp;quot;horses&amp;quot;      
+## [6] &amp;quot;sheep&amp;quot;        &amp;quot;none&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;acknowledgements&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Acknowledgements&lt;/h2&gt;
+&lt;p&gt;Thanks to the Natural Environment Research Council, the Legumes Translated project, and the University of Edinburgh/Scotland’s Rural College MSc programmes for providing the context, projects and requirements which led to the development of much of the code in this package. &lt;a href=&#34;https://github.com/csgillespie&#34;&gt;Colin Gillespie&lt;/a&gt; has been an incredible and approachable mentor, and his input to my coding generally has undoubtedly influenced the development of this package. The package is based around &lt;code&gt;tidyverse&lt;/code&gt; ideas and functions, so thanks go also to Hadley Wickham and the &lt;code&gt;tidyverse&lt;/code&gt; team for building and maintaining this incredible environment.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;contribute&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Contribute&lt;/h2&gt;
+&lt;p&gt;If you would like to contribute to this package, please file an issue, make a pull request on GitHub, or contact the author on Twitter &lt;a href=&#34;https://twitter.com/alasdair_sykes&#34;&gt;@alasdair_sykes&lt;/a&gt; or by email at &lt;a href=&#34;mailto:alasdair.sykes@sruc.ac.uk&#34; class=&#34;email&#34;&gt;alasdair.sykes@sruc.ac.uk&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</description>
     </item>
     
     <item>
@@ -26,8 +251,136 @@
       <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
       
       <guid>/2020/08/making-an-api-call-with-r.en-us/</guid>
-      <description>A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential — I’ll be posting plenty about that when it’s more mature — but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.
-In the past, I’ve used spatial data as the building blocks for many of the models I build, and it’s especially pertinent for solar-based models.</description>
+      <description>
+
+
+&lt;p&gt;A bit of an accidental blog post, this one. My current side project is a Shiny application for estimating solar panel energy generation potential — I’ll be posting plenty about that when it’s more mature — but for now, I found a neat solution that streamlined a small part of that workflow, and I think it might interest some.&lt;/p&gt;
+&lt;p&gt;In the past, I’ve used spatial data as the building blocks for many of the models I build, and it’s especially pertinent for solar-based models. For example, a spatially specific estimate of solar irradiation is pretty indispensible when it comes to making supportable estimates for the performance of solar tech. For the solar app, I want the user to be able to specify their location and receive output data specific to their local climatic conditions.&lt;/p&gt;
+&lt;p&gt;The easy solution for the app would be just to wrap up some raster data in .rds form and add it into the directory. However, that seems inelegant; apart from adding some fairly chunky files to the app bundle (think global coverage * 2–3 layers * 30-arc-second resolution * 12 months), it also means these have to be read in and out every time the app is loaded, slowing things down quite a bit. Inevitably, I’d end up making compromises — lower resolution for faster performance, skip a layer to avoid going over bundle size limits, etc.&lt;/p&gt;
+&lt;p&gt;After a bit of head-scratching and searching, I discovered the National Renewable Energy Laboratory’s &lt;a href=&#34;https://developer.nrel.gov/docs/solar/solar-resource-v1/&#34;&gt;Developer Network&lt;/a&gt;. NREL’s DN domain hosts a free application programming interface (API) allowing the user to query and retrieve solar-relevant data.&lt;/p&gt;
+&lt;p&gt;Before starting, it’s worth noting that many APIs have R packages built around them, making their use very straightforward — the &lt;code&gt;rtweet&lt;/code&gt; package is a mature (and very cool) example. Full disclosure here — I was originally going to do this blog post for the UK postcodes API hosted at &lt;a href=&#34;http://api.postcodes.io/postcodes/&#34; class=&#34;uri&#34;&gt;http://api.postcodes.io/postcodes/&lt;/a&gt; (also used in my app), and got fully halfway into it before realising that there’s already an R package built for this, documented &lt;a href=&#34;http://walczak.org/2016/07/postcode-and-geolocation-api-for-the-uk/&#34;&gt;here&lt;/a&gt;. By contrast, the NREL API doesn’t have its own R package, but it’s very straightforward to knock together your own call. We’re going to use the &lt;code&gt;httr&lt;/code&gt; and &lt;code&gt;jsonlite&lt;/code&gt; packages to pull the call together.&lt;/p&gt;
+&lt;p&gt;Based on documentation from the &lt;a href=&#34;https://developer.nrel.gov/docs/solar/solar-resource-v1/&#34;&gt;API homepage&lt;/a&gt;, we can see that the URL required for the API takes this format:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;https://developer.nrel.gov/api/solar/solar_resource/v1.json?api_key=DEMO_KEY&amp;amp;lat=40&amp;amp;lon=-105&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Breaking that down, the parts of interest are &lt;code&gt;.json&lt;/code&gt;, indicating the file return format (.xml is also an option, but with &lt;code&gt;jsonlite&lt;/code&gt; available, .json is definitely my preference), &lt;code&gt;api_key=DEMO_KEY&lt;/code&gt;, giving me space for authentication, and the &lt;code&gt;lat&lt;/code&gt;/&lt;code&gt;lon&lt;/code&gt; entries, giving me space to supply my query data.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; To dissuade the internet from borrowing my API key (though it’s free to get — signup is &lt;a href=&#34;https://developer.nrel.gov/signup/&#34;&gt;here&lt;/a&gt;), I’ve built a function which returns the key in a separate (non-tracked script), and I source that first before building. Here’s what that code looks like:&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# example function
+api_key &amp;lt;- function() return(&amp;quot;some_api_key&amp;quot;)
+
+# overwrite with function returning actual key
+source(&amp;quot;private/nrel-api-key.R&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;That done, here’s a simple &lt;code&gt;paste0&lt;/code&gt; based method to knock that call together. For location, I’m going to use the example lat/lon documented on the NREL developer page, which looks to be just north of Denver, Colorado, USA.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;base &amp;lt;- &amp;quot;https://developer.nrel.gov/api/solar/solar_resource/v1.json?api_key=&amp;quot;
+lat &amp;lt;- 40
+lon &amp;lt;- -105
+loc &amp;lt;- paste0(&amp;quot;&amp;amp;lat=&amp;quot;, lat, &amp;quot;&amp;amp;lon=&amp;quot;, lon)
+
+api_call &amp;lt;- paste0(base, api_key(), loc)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we’ll use &lt;code&gt;GET&lt;/code&gt; and &lt;code&gt;content&lt;/code&gt; from the &lt;code&gt;httr&lt;/code&gt; package to make and interpret the call:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# make call
+result &amp;lt;- httr::GET(api_call)
+
+# extract text
+result_text &amp;lt;- httr::content(result, as = &amp;quot;text&amp;quot;)
+
+print(result_text)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;{\&amp;quot;version\&amp;quot;:\&amp;quot;1.0.0\&amp;quot;,\&amp;quot;warnings\&amp;quot;:[],\&amp;quot;errors\&amp;quot;:[],\&amp;quot;metadata\&amp;quot;:{\&amp;quot;sources\&amp;quot;:[\&amp;quot;Perez-SUNY/NREL, 2012\&amp;quot;]},\&amp;quot;inputs\&amp;quot;:{\&amp;quot;lat\&amp;quot;:\&amp;quot;40\&amp;quot;,\&amp;quot;lon\&amp;quot;:\&amp;quot;-105\&amp;quot;},\&amp;quot;outputs\&amp;quot;:{\&amp;quot;avg_dni\&amp;quot;:{\&amp;quot;annual\&amp;quot;:6.06,\&amp;quot;monthly\&amp;quot;:{\&amp;quot;jan\&amp;quot;:5.0,\&amp;quot;feb\&amp;quot;:5.34,\&amp;quot;mar\&amp;quot;:5.94,\&amp;quot;apr\&amp;quot;:6.11,\&amp;quot;may\&amp;quot;:6.36,\&amp;quot;jun\&amp;quot;:7.43,\&amp;quot;jul\&amp;quot;:7.48,\&amp;quot;aug\&amp;quot;:6.65,\&amp;quot;sep\&amp;quot;:6.81,\&amp;quot;oct\&amp;quot;:5.82,\&amp;quot;nov\&amp;quot;:5.11,\&amp;quot;dec\&amp;quot;:4.67}},\&amp;quot;avg_ghi\&amp;quot;:{\&amp;quot;annual\&amp;quot;:4.81,\&amp;quot;monthly\&amp;quot;:{\&amp;quot;jan\&amp;quot;:2.5,\&amp;quot;feb\&amp;quot;:3.43,\&amp;quot;mar\&amp;quot;:4.69,\&amp;quot;apr\&amp;quot;:5.69,\&amp;quot;may\&amp;quot;:6.6,\&amp;quot;jun\&amp;quot;:7.25,\&amp;quot;jul\&amp;quot;:7.14,\&amp;quot;aug\&amp;quot;:6.24,\&amp;quot;sep\&amp;quot;:5.35,\&amp;quot;oct\&amp;quot;:3.85,\&amp;quot;nov\&amp;quot;:2.75,\&amp;quot;dec\&amp;quot;:2.19}},\&amp;quot;avg_lat_tilt\&amp;quot;:{\&amp;quot;annual\&amp;quot;:5.82,\&amp;quot;monthly\&amp;quot;:{\&amp;quot;jan\&amp;quot;:4.79,\&amp;quot;feb\&amp;quot;:5.4,\&amp;quot;mar\&amp;quot;:6.07,\&amp;quot;apr\&amp;quot;:6.11,\&amp;quot;may\&amp;quot;:6.25,\&amp;quot;jun\&amp;quot;:6.47,\&amp;quot;jul\&amp;quot;:6.58,\&amp;quot;aug\&amp;quot;:6.44,\&amp;quot;sep\&amp;quot;:6.53,\&amp;quot;oct\&amp;quot;:5.71,\&amp;quot;nov\&amp;quot;:4.99,\&amp;quot;dec\&amp;quot;:4.47}}}}&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Looks like we’ve got something there, but it’s not very helpfully structured. If you were to paste that into a text file and save it with the .json extension, a text editor which recognises the filetype would format it much more nicely for you. However, we’re interested in getting the data in usable form, so it’s time to bring in &lt;code&gt;jsonlite&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# convert from .json to list
+result_list &amp;lt;- jsonlite::fromJSON(result_text, flatten = TRUE)
+
+# main results list structure
+names(result_list)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;version&amp;quot;  &amp;quot;warnings&amp;quot; &amp;quot;errors&amp;quot;   &amp;quot;metadata&amp;quot; &amp;quot;inputs&amp;quot;   &amp;quot;outputs&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# let&amp;#39;s see what we&amp;#39;ve got for outputs
+str(result_list$outputs)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## List of 3
+##  $ avg_dni     :List of 2
+##   ..$ annual : num 6.06
+##   ..$ monthly:List of 12
+##   .. ..$ jan: num 5
+##   .. ..$ feb: num 5.34
+##   .. ..$ mar: num 5.94
+##   .. ..$ apr: num 6.11
+##   .. ..$ may: num 6.36
+##   .. ..$ jun: num 7.43
+##   .. ..$ jul: num 7.48
+##   .. ..$ aug: num 6.65
+##   .. ..$ sep: num 6.81
+##   .. ..$ oct: num 5.82
+##   .. ..$ nov: num 5.11
+##   .. ..$ dec: num 4.67
+##  $ avg_ghi     :List of 2
+##   ..$ annual : num 4.81
+##   ..$ monthly:List of 12
+##   .. ..$ jan: num 2.5
+##   .. ..$ feb: num 3.43
+##   .. ..$ mar: num 4.69
+##   .. ..$ apr: num 5.69
+##   .. ..$ may: num 6.6
+##   .. ..$ jun: num 7.25
+##   .. ..$ jul: num 7.14
+##   .. ..$ aug: num 6.24
+##   .. ..$ sep: num 5.35
+##   .. ..$ oct: num 3.85
+##   .. ..$ nov: num 2.75
+##   .. ..$ dec: num 2.19
+##  $ avg_lat_tilt:List of 2
+##   ..$ annual : num 5.82
+##   ..$ monthly:List of 12
+##   .. ..$ jan: num 4.79
+##   .. ..$ feb: num 5.4
+##   .. ..$ mar: num 6.07
+##   .. ..$ apr: num 6.11
+##   .. ..$ may: num 6.25
+##   .. ..$ jun: num 6.47
+##   .. ..$ jul: num 6.58
+##   .. ..$ aug: num 6.44
+##   .. ..$ sep: num 6.53
+##   .. ..$ oct: num 5.71
+##   .. ..$ nov: num 4.99
+##   .. ..$ dec: num 4.47&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Very nice, and a lot more usable than the raw .json. As a final flourish, let’s use a bit of &lt;code&gt;dplyr&lt;/code&gt; and &lt;code&gt;purrr&lt;/code&gt; to wrangle that list into a nice tidy dataframe (I’m just going to load the full &lt;code&gt;tidyverse&lt;/code&gt; here since I’m lazy).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
+
+# extract outputs
+output &amp;lt;- result_list$output
+
+# convert list output field to tidy df
+output_df &amp;lt;- output %&amp;gt;%
+  map_dfr(~.x$monthly) %&amp;gt;% # return row-wise data frame bind
+  mutate(metric = names(output)) %&amp;gt;% # add names
+  gather(-metric, key = &amp;quot;month&amp;quot;, value = &amp;quot;value&amp;quot;)
+
+glimpse(output_df)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 36
+## Columns: 3
+## $ metric &amp;lt;chr&amp;gt; &amp;quot;avg_dni&amp;quot;, &amp;quot;avg_ghi&amp;quot;, &amp;quot;avg_lat_tilt&amp;quot;, &amp;quot;avg_dni&amp;quot;, &amp;quot;avg_ghi&amp;quot;, &amp;quot;a…
+## $ month  &amp;lt;chr&amp;gt; &amp;quot;jan&amp;quot;, &amp;quot;jan&amp;quot;, &amp;quot;jan&amp;quot;, &amp;quot;feb&amp;quot;, &amp;quot;feb&amp;quot;, &amp;quot;feb&amp;quot;, &amp;quot;mar&amp;quot;, &amp;quot;mar&amp;quot;, &amp;quot;mar&amp;quot;,…
+## $ value  &amp;lt;dbl&amp;gt; 5.00, 2.50, 4.79, 5.34, 3.43, 5.40, 5.94, 4.69, 6.07, 6.11, 5.…&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;That about does it. This has been a code-heavy and visualisation-light post, so let’s finish on a plot for style points.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;long_metric &amp;lt;- tibble(metric = c(&amp;quot;avg_dni&amp;quot;, &amp;quot;avg_ghi&amp;quot;, &amp;quot;avg_lat_tilt&amp;quot;),
+                      long = c(&amp;quot;Direct normal irradiation&amp;quot;,
+                               &amp;quot;Global horizontal irradiation&amp;quot;,
+                               &amp;quot;Average tilt at latitude&amp;quot;))
+
+output_df %&amp;gt;%
+  mutate(date = lubridate::dmy(paste0(&amp;quot;01-&amp;quot;, month, &amp;quot;-14&amp;quot;))) %&amp;gt;%
+  left_join(long_metric, by = &amp;quot;metric&amp;quot;) %&amp;gt;%
+  ggplot(aes(x = date, y = value, colour = long)) +
+  scale_x_date(date_labels = &amp;quot;%b&amp;quot;, date_breaks = &amp;quot;3 months&amp;quot;) +
+  labs(x = &amp;quot;&amp;quot;,
+       y = expression(&amp;quot;Solar insolation (kWh m&amp;quot;^{-2}*&amp;quot; day&amp;quot;^{-1}*&amp;quot;)&amp;quot;),
+       colour = &amp;quot;&amp;quot;,
+       title = &amp;quot;Monthly solar insolation&amp;quot;,
+       subtitle = paste0(&amp;quot;lat = &amp;quot;, lat, &amp;quot;, lon = &amp;quot;, lon)) +
+  geom_line() +
+  theme_classic() +
+  theme(legend.position = &amp;quot;bottom&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-08-09-making-an-api-call-with-r.en-us_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Thanks for reading!&lt;/p&gt;
+</description>
     </item>
     
     <item>
@@ -36,7 +389,56 @@ In the past, I’ve used spatial data as the building blocks for many of the mod
       <pubDate>Tue, 04 Aug 2020 00:00:00 +0000</pubDate>
       
       <guid>/2020/08/migrating-your-workflow-to-r.en-us/</guid>
-      <description>When you look at the online portfolios of established, social-media-present R aficionados, it’s tempting to assume that these folks were born authoring documents in Markdown and piecing together impossibly neat workflows to solve problems that the rest of us are too damn mundane to understand, let alone solve. I think this feeling of comparative inadequacy is particularly prevalent for the occasional useR who comes from a natural science, rather than a computational or mathematical background; most of us from this side of the tracks come to R to solve particular problems in our daily workflow (be it statistical testing, data visualisation, big data handling etc.</description>
+      <description>
+
+
+&lt;p&gt;When you look at the online portfolios of established, social-media-present R aficionados, it’s tempting to assume that these folks were born authoring documents in Markdown and piecing together impossibly neat workflows to solve problems that the rest of us are too damn mundane to understand, let alone solve. I think this feeling of comparative inadequacy is particularly prevalent for the occasional useR who comes from a natural science, rather than a computational or mathematical background; most of us from this side of the tracks come to R to solve particular problems in our daily workflow (be it statistical testing, data visualisation, big data handling etc.) rather than as an intellectual exercise in and of itself.&lt;/p&gt;
+&lt;p&gt;As a result, it takes quite a bit of mental effort for us to leave aside those specific problems for long enough and actually consider making R the basis, rather than a component, of our daily workflow. I’ve recently made this switch, and, with the zeal of the newly enlightened, I’m now going to talk to you about it. Since going all-in on R is quite a challenging prospect for those of us who’ve been brought up in the comforting azure glow of the Microsoft Office suite, this blog post is basically a blow-by-blow account of the baby steps you can take in the direction of an R-based daily workflow. It’s directly informed by my own journey, which means it’s by no means the best, fastest or most efficient way to do things. My journey in this direction is also, I’m sure, far from complete. Nonetheless, if, like me, you’re an academic with no formal programming training, but a regular ‘practical’ R user, I hope it might be an interesting read.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Before I start&lt;/strong&gt;. This is already shaping up to be a pretty long blog post, so I’m going to try and keep these steps as brief as possible; this is more of a &lt;strong&gt;what’s-possible&lt;/strong&gt; than a &lt;strong&gt;how-to&lt;/strong&gt; post. It took me quite a lot of trial and error to figure out some of these steps, so I hope that by collating them all in one place, I might cut down that messing-about time for others. I’m also definitely not the best person to explain the intricacies of completing each step, so where appropriate, I’ll point you in the direction of those who are. Ok — onwards.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div id=&#34;start-using-r-markdown-for-everyday-data-analysis-and-communication&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;1. Start using R Markdown for everyday data analysis and communication&lt;/h1&gt;
+&lt;p&gt;I came to this way, way later than I should have. Assuming you’re writing R scripts to do your data analysis, there is no reason that you shoudn’t or couldn’t be writing .Rmd documents. It is a markdown language, so it looks and feels different to writing a document in a word processor, but it’s super intuitive to use, and (crucially) very easy to incorporate functional R code into. If you can write basic code in R, and you can write an email, you can write R Markdown. &lt;a href=&#34;https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf&#34;&gt;This&lt;/a&gt; cheatsheet is really all you need to get started. Try the following:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;Next time you have a question about an R script for a colleague/supervisor/friend, instead of copy-pasting code into the body of an email (we’ve all been there), try writing the question into a short, reproducible .Rmd, knit it to .html, and attach both. That way, your questionee has a well ordered, documented basis for your question, and, crucially, reproducible code.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;If you’re doing a long, complicated piece of data analysis, try using a .Rmd file as the basis, instead of a regular .R script. That way, you will be encouraged to leave a much more detailed explanation for your future self, and as a bonus, you can knit it and you’ll have a pretty professional looking document to share with others who might be interested. If the code isn’t reproducible (say, for example, if you have locally stored data that’s read in to kick things off) it’s also not the end of the world — when you knit it locally, it’s all rendered to .html, and your reader can still see what the intermediate steps and outputs look like.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div id=&#34;start-using-rstudios-projects-feature&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;2. Start using RStudio’s &lt;em&gt;Projects&lt;/em&gt; feature&lt;/h1&gt;
+&lt;p&gt;I also came to this pretty late — in fact, I only really started doing it in order to facilitate step 3 (Git), for which it’s a pre-requisite. That was a mistake — there’s no single tool in RStudio which can help smooth out your workflow more than Projects. In technical terms, by creating a project in the RStudio IDE, you create a .Rproj file (and a bunch of others) in a given project directory. What this means in the real world is that, when you’re working on that project, R treats the base directory of that project as your working directory. If you still start all your scripts with &lt;code&gt;setwd(&#34;some/long/ass/path/to/my/working/directory&#34;)&lt;/code&gt;, you need to start using Projects. There are a number of other advantages (e.g. working on multiple projects at once, or zipping your project file and sending it to someone), but the &lt;code&gt;wd&lt;/code&gt; thing is definitely the easy win here.&lt;/p&gt;
+&lt;p&gt;It’s also one of the most intuitive steps in this post — so much so that I realise I’ve never actually read the RStudio Projects documentation, which is &lt;a href=&#34;https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects&#34;&gt;here&lt;/a&gt; as it turns out.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;install-git-and-make-an-account-on-github&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;3. Install Git and make an account on &lt;a href=&#34;https://www.github.com&#34;&gt;GitHub&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;I actually did this before I started doing any of part 1, and only did part 2 in order to make this happen. In retrospect, that’s topsy-turvy, but (having gone once too often for R help to the inimitable and Git-evangelical &lt;a href=&#34;http://mikerspencer.com&#34;&gt;Mike Spencer&lt;/a&gt;), I was persuaded of the merits of version control and, somewhere, found the energy to get myself up and running with Git. For solo coding, the best analogy I’ve heard for Git is that coding without it is like rock climbing without using protection. If (or really when) you mess up, you fall only as far as your last anchor (commit) with Git, or all the way to the ground without. And for collaborating on coding work, there really is no other way.&lt;/p&gt;
+&lt;p&gt;Version control can feel like a lot of extra effort for little gain when you start it. I think this is often because most people implement their own DIY-type version control (&lt;em&gt;script.R -&amp;gt; script-v2.R -&amp;gt; script-some-colleagues-initials.R -&amp;gt; script-final.R -&amp;gt; script-definitely-actually-final.R&lt;/em&gt; — look familiar?). Having made the move to Git, most do both initially. Once you realise the power and purpose of Git though, you can do away with the DIY stuff. It’s like having all of those versions wrapped up in one, but for multiple files, annotated with reasons for the changes, and with the ability to roll back to any version at any time.&lt;/p&gt;
+&lt;p&gt;Of all the steps here, this one is probably the most valuable and, probably, has the steepest learning curve. With that said, a combination of the inbuilt GUI-accessible tools in GitHub’s interface and in RStudio mean that you can get away without doing much, if anything, in the terminal — though it’s worth getting comfortable there too (I’m not especially — yet). Of all the materials and tutorials available on the web for this step, Jenny Bryan’s &lt;a href=&#34;https://happygitwithr.com&#34; class=&#34;uri&#34;&gt;https://happygitwithr.com&lt;/a&gt; is the best (and best-named) that I’ve yet found.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;get-your-references-into-a-.bib-and-start-using-it&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;4. Get your references into a .bib and start using it&lt;/h1&gt;
+&lt;p&gt;This stopped me from using R Markdown for my entire writing workflow for the &lt;em&gt;longest&lt;/em&gt; time. In retrospect, it’s quite funny that the final remaining thread of my attachment to Microsoft Word was actually the clunky, buggy add-in from Mendeley Desktop (if you’ve never used a reference manager, I can recommend Mendeley wholeheartedly). It really shouldn’t have surprised me that there would be a neater solution in R Markdown (or any markdown language, come to that), but it took me a Covid lockdown and a week’s holiday to get around to tracking it down.&lt;/p&gt;
+&lt;p&gt;Most reference managers can create a .bib file for you — this basically contains all of the information for all the references in your library. Mendeley even automatically updates it with new additions. Save it somewhere memorable and easily accessed, and point to it in the YAML metadata at the top of your R Markdown scripts (and optionally, do the same with a .csl file to get your desired citation style). Then use citations keys in your text (something like &lt;code&gt;@Sykes2020&lt;/code&gt;), which will be rendered as proper citations, and your references section will be built automatically. Cute.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.rosannavanhespen.nl/2016/02/17/writing-your-thesis-with-r-markdown-2-text-citations-and-equations/&#34;&gt;This&lt;/a&gt; blog entry is where I started, and it’s really useful, though mistaken on one point — you don’t need your &lt;em&gt;library.bib&lt;/em&gt; file to be in the same folder as your .Rmd document, so long as you point to the filepath in the YAML header. A pretty comprehensive list of citation styles can be retrieved from &lt;a href=&#34;https://github.com/citation-style-language/styles&#34; class=&#34;uri&#34;&gt;https://github.com/citation-style-language/styles&lt;/a&gt;. I like &lt;em&gt;elsevier-harvard2.csl&lt;/em&gt;, as will you if you’re used to reading environmental science journals.&lt;/p&gt;
+&lt;p&gt;Next time you write a report or paper manuscript, do it in R Markdown and avoid that sinking feeling when your project stakeholder or co-author asks you to change some fundamental assumption or parameter — if you link the .Rmd directly to your analysis, it’ll keep itself fully up-to-date with no more effort required.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;start-building-r-shiny-apps&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;5. Start building R Shiny apps&lt;/h1&gt;
+&lt;p&gt;I debated whether to add this step or not, since it’s more a cool addition to your workflow than anything more fundamental — there’s no real analogue for this in a non-code-based workflow. But Shiny apps are just about the best way there is to share the results of your work – and, if you’re an educator, they also make a really cool way to leverage the power of R without overburdening non-code-savvy students with the language itself. &lt;a href=&#34;https://www.github.com/aj-sykes92/msc-soil-c-modelling-tutorial&#34;&gt;This&lt;/a&gt; tutorial (with accompanying app) represents some of the most fun I’ve had teaching recently, and was well-received by students of differing R abilities. &lt;a href=&#34;https://alasdair-sykes.shinyapps.io/agroforestry-defra-prelim/&#34;&gt;This&lt;/a&gt; app took me a couple of days at the end of a recent project, and is currently in use by the UK government to inform GHG policy decisions.&lt;/p&gt;
+&lt;p&gt;A Shiny app can be written in a few lines of R code, and thanks to a lot of hard work by the team behind the &lt;code&gt;shiny&lt;/code&gt; package, they’re very intuitive to build and look like pro-level witchcraft to the uninitiated. Definitely a good level of return-on-investment for time spent learning. Get yourself a free account on &lt;a href=&#34;https://shinyapps.io&#34; class=&#34;uri&#34;&gt;https://shinyapps.io&lt;/a&gt; and anyone in the world with a web connection will be able to appreciate your genius (so long as they do so for less than 25 hours a month…). &lt;a href=&#34;https://shiny.rstudio.com/tutorial/&#34;&gt;This&lt;/a&gt; tutorial by Garrett Grolemund is as comprehensive an introduction as it gets, and comes with a suite of example apps.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;use-r-to-build-and-manage-your-professional-portfolio&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;6. Use R to build and manage your professional portfolio&lt;/h1&gt;
+&lt;p&gt;There’s no better way to convince a prospective employer of your coding chops than by making sure their introduction to your virtual self is via materials created in that coding language. I personally would put a lot more stock in reading a CV that’s written in R Markdown than in reading on that CV that the applicant once took a course in R.&lt;/p&gt;
+&lt;p&gt;With that in mind, the clever folks behind the &lt;code&gt;vitae&lt;/code&gt; package have made it dead easy for you to knock together a killer CV based on a .Rmd. You can even leverage other packages within it, letting you do cool stuff like use the &lt;code&gt;scholar&lt;/code&gt; package to retrieve your publications from Google Scholar and use the results to build the Publications section. &lt;a href=&#34;https://cran.r-project.org/web/packages/vitae/vignettes/vitae.html&#34;&gt;This&lt;/a&gt; is a pretty good introduction to &lt;code&gt;vitae&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Many folks also want to have a website these days, and it’s a great way to make sure that your personal profile exists outside of your current position or institution. If you already use R Markdown (and, ideally, GitHub), the &lt;code&gt;blogdown&lt;/code&gt; package, built around the Hugo framework, provides you with a simple way to build and maintain a personal website in R. This site is built with &lt;code&gt;blogdown&lt;/code&gt; and Hugo’s tranquilpeak template (find it &lt;a href=&#34;https://github.com/kakawait/hugo-tranquilpeak-theme/blob/master/docs/user.md&#34;&gt;here&lt;/a&gt;). The site is essentially a GitHub repository that deploys directly the the domain via &lt;a href=&#34;https://www.netlify.com&#34;&gt;Netlify&lt;/a&gt;. Blog posts are super easy to write in the RStudio IDE, and I have all of the advantages that come with writing in R Markdown and managing version control with Git.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;thats-all-folks&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;That’s all folks&lt;/h1&gt;
+&lt;p&gt;Hopefully that gives anyone who’s thinking of going cold-turkey on the MS Office-based workflow a few places to start. I’m by no means an expert and am definitely still fumbling my way through it; for example, I’ve yet to explore the &lt;code&gt;bookdown&lt;/code&gt; package for writing more complex documents with Markdown, so I’m looking forward to giving that a try. I always have the impression when I’m reading instructionals on this stuff that the writer got it all right first time, so I’ve tried — hopefully with some success — to avoid that here. Let me know if you have anything you’d add to this list, or anything you’d change. Cheers!&lt;/p&gt;
+&lt;/div&gt;
+</description>
     </item>
     
     <item>
@@ -45,8 +447,98 @@ In the past, I’ve used spatial data as the building blocks for many of the mod
       <pubDate>Tue, 28 Jul 2020 00:00:00 +0000</pubDate>
       
       <guid>/2020/07/web-and-pdf-scraping.en-us/</guid>
-      <description>I thought this would make as good a debut post as any for the new site. Here’s the challenge:
-My partner is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time. As a result, we’ve used our subscriptions budget to sign up to Great Courses Plus, which is essentially geeky version of Netflix, streaming lecture series instead of shows.</description>
+      <description>
+
+
+&lt;p&gt;I thought this would make as good a debut post as any for the new site. Here’s the challenge:&lt;/p&gt;
+&lt;p&gt;My partner is, like many of us, taking the extended pandemic lockdown/recovery as an opportunity to catch up on some learning — and though I’m lucky enough to be working from home too, I’ve also been looking for ways to feel like I’m doing more than just passing time. As a result, we’ve used our subscriptions budget to sign up to &lt;a href=&#34;https://www.thegreatcoursesplus.com&#34;&gt;Great Courses Plus&lt;/a&gt;, which is essentially geeky version of Netflix, streaming lecture series instead of shows. I thoroughly recommend it, by the way.&lt;/p&gt;
+&lt;p&gt;Aisha’s predictably taking it a bit more seriously than I am. Recently, she became frustrated that, despite the quality of their courses, the Great Courses’ documentation and indexing of their offerings is incredibly poor, and consequently very difficult to search properly. It’s hard to tell why, but it seems like they’ve updated and re-packaged their offerings once too often, and with too little care for the searchability of their courses. A bit of digging revealed, however, that their entire collection of supplementary materials (.pdf files with transcripts and figures to accompany the lectures) is hosted freely on their site under a series of sequential numeric URL slugs; but crazily, there’s no definitive index page which contains entries for each. Aisha wanted to be able to see it all in one place, and to see at a glance the key attributes and metadata for each course — without typing hundreds of random URLs into a web browser. I took on the challenge, which became:&lt;/p&gt;
+&lt;ol class=&#34;example&#34; style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;Download the whole Great Courses supplementary materials collection (approximately 480 courses)&lt;/li&gt;
+&lt;li&gt;Extract relevant information from the title pages of the files&lt;/li&gt;
+&lt;li&gt;Write the files to a shared repository with informative, structured, searchable file names&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Quick disclaimer:&lt;/strong&gt; Opinions differ on the moral righteousness of web scraping, particularly in cases where it might be against the wishes of the host (&lt;a href=&#34;https://www.imperva.com/blog/is-web-scraping-illegal/&#34;&gt;this&lt;/a&gt; is quite an interesting discussion on that subject). Technically I guess this falls into the web scraping category since, while the files are in .pdf form, I’m retrieving them programmatically from a website. My conscience is clear on this one, since I’ve already got a paid-up subscription to the site in question, and the purpose of the scrape was to compensate for poor indexing by the host. Whether the lack of paywall on this material is an oversight or not is unclear, and so while you could (in theory) go get this material yourself, this blog post is &lt;strong&gt;in no way a suggestion that you do so&lt;/strong&gt;. To this end, I’ve anonomised the base URL in the relevant code block. If you still want to do it, a quick Google will, I’m sure, furnish you with the missing information and then it’s between you and your conscience. Ok — onwards.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;First job was to put together a vector of the relevant URLs — these were identical, save for the numeric suffix (000004 to 000486). &lt;code&gt;stringr&lt;/code&gt; (loaded with &lt;code&gt;tidyverse&lt;/code&gt;) is a great part of the toolbox for this sort of thing:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
+
+# create vector of url strings
+root &amp;lt;- &amp;quot;http://some.url/domain/slug_&amp;quot;
+
+number &amp;lt;- 4:486 %&amp;gt;%
+  as.character() %&amp;gt;%
+  str_pad(width = 6, side = &amp;quot;left&amp;quot;, pad = &amp;quot;0&amp;quot;)
+
+urls &amp;lt;- paste0(root, number, &amp;quot;.pdf&amp;quot;)
+
+print(urls[1:5])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;http://some.url/domain/slug_000004.pdf&amp;quot;
+## [2] &amp;quot;http://some.url/domain/slug_000005.pdf&amp;quot;
+## [3] &amp;quot;http://some.url/domain/slug_000006.pdf&amp;quot;
+## [4] &amp;quot;http://some.url/domain/slug_000007.pdf&amp;quot;
+## [5] &amp;quot;http://some.url/domain/slug_000008.pdf&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Side note. I’ve recently been making a concerted effort to move away from loops in &lt;code&gt;R&lt;/code&gt; programming. Arguably it’s a transition I should have made some time ago, but an ever-increasing need to make my coding more robust, easier to read and understand, and more computationally efficient has put the final nail in the coffin of the &lt;code&gt;for&lt;/code&gt; loop in my scripts. I’ve found functional programming and list-wise operations with &lt;code&gt;purrr&lt;/code&gt; fill this gap perfectly, and &lt;code&gt;purrr&lt;/code&gt; is much more intuitive to learn and use than the base &lt;code&gt;apply&lt;/code&gt; family of functions. Accordingly, while I have many &lt;code&gt;for&lt;/code&gt; loop-based scripts from previous web scrapes tucked away in various dusty filepaths, I started fresh with this one and worked list-wise instead.&lt;/p&gt;
+&lt;p&gt;The next job was to extract the data from the first page of a test-case document, and build a workflow that would convert the extracted text from the first page of a pdf into something short and informative, that could itself be built into a useful filepath.&lt;/p&gt;
+&lt;p&gt;First, we need to download a test case; this just uses a base &lt;code&gt;utils&lt;/code&gt; function.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# download a test pdf
+download.file(urls[1], destfile = &amp;quot;testfile.pdf&amp;quot;, mode = &amp;quot;wb&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here’s a snapshot of what that title page looks like:
+&lt;br&gt;&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;/post/2020-07-28-web-scraping-and-purrr.en-us_files/Screenshot%202020-08-03%20at%2009.22.06.png&#34; alt=&#34;&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;Great Courses example page header&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Now to load in &lt;code&gt;pdftools&lt;/code&gt; and extract the text itself.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(pdftools)
+testtext &amp;lt;- pdf_text(&amp;quot;testfile.pdf&amp;quot;)
+
+print(testtext[[1]])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;                          Topic   Subtopic\n                          History Medieval History\n1066\nCourse Guidebook\nProfessor Jennifer Paxton\nGeorgetown University\n&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;All the information is there, albeit in fairly difficult to read form. The following &lt;code&gt;stringr&lt;/code&gt; based function tidies it into a nice, neat filepath; it’s a bit piecemeal (I’m sure &lt;em&gt;regex&lt;/em&gt; afficionados can think of numerous ways to tidy/shorten it), but in the spirit of full disclosure, I haven’t altered or neatened it any from how I threw it together for its original purpose.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# function to build text into filepath
+build_filepath &amp;lt;- function(text){
+  filename &amp;lt;- text[[1]] %&amp;gt;%
+    str_to_lower() %&amp;gt;% # turn everything lowercase
+    str_replace_all(&amp;quot;subtopic&amp;quot;, &amp;quot;&amp;quot;) %&amp;gt;% # remove the word &amp;#39;subtopic&amp;#39;
+    str_replace_all(&amp;quot;topic&amp;quot;, &amp;quot;&amp;quot;) %&amp;gt;% # remove the word &amp;#39;topic&amp;#39;
+    str_replace_all(&amp;quot;course guidebook&amp;quot;, &amp;quot;&amp;quot;) %&amp;gt;% # remove the phrase &amp;#39;course guidebook&amp;#39;
+    str_replace_all(&amp;quot;\\W+&amp;quot;, &amp;quot;-&amp;quot;) %&amp;gt;% # replace all groups of non-word chars with a hyphen
+    str_replace_all(&amp;quot;^\\W+&amp;quot;, &amp;quot;&amp;quot;) %&amp;gt;% # remove non-word chars at start of string
+    str_replace_all(&amp;quot;\\W+$&amp;quot;, &amp;quot;.pdf&amp;quot;) # remove non-word chars at end of string and add &amp;#39;.pdf&amp;#39;.
+  
+  filepath &amp;lt;- paste0(&amp;quot;pdf-directory/&amp;quot;, filename)
+  
+  return(filepath)
+}
+
+# test function
+build_filepath(testtext)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;pdf-directory/history-medieval-history-1066-professor-jennifer-paxton-georgetown-university.pdf&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Lovely. The final flourish is to wrap that function in something which will download the relevant pdf from the URL:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# function to download pdf, save and rename
+scrape_pdf &amp;lt;- function(url){
+  
+  # download file
+  download.file(url, destfile = &amp;quot;temp.pdf&amp;quot;, mode = &amp;quot;wb&amp;quot;)
+  
+  # extract text
+  text &amp;lt;- pdf_text(&amp;quot;temp.pdf&amp;quot;)
+  
+  # resave
+  file.rename(&amp;quot;temp.pdf&amp;quot;, build_filepath(text))
+  
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that this function first saves the .pdf to a temporary location (&lt;em&gt;temp.pdf&lt;/em&gt; in the base project directory). From there, it extracts the text, parses it into a filename, and uses this to rename the file using another &lt;code&gt;utils&lt;/code&gt; function. Note also that the function itself doesn’t return anything, but rather works ‘behind-the-scenes’ directly from the relevant directory.&lt;/p&gt;
+&lt;p&gt;A little testing revealed a couple of things. Firstly, not all the URLs in my vector were valid — most were, but one or two returned 404 errors. Secondly, some ball-park benchmarking let me know that it would take about 45 minutes for my script to run on all 400+ URLs, with most of the time going into the download process. Without anything to tell it otherwise, any list-wise operations with this function would terminate at the first error, and I didn’t want to have to sit and watch it work for the duration.&lt;/p&gt;
+&lt;p&gt;This is typical of web scraping operations — they’re often lengthy, repetitive, and just different enough to fail occasionally. Trying to catch all the potential failure points in a loop is a real headache, and often takes several abortive attempts to fail-proof it. Fortunately, &lt;code&gt;purrr&lt;/code&gt; provides a rich suite of tools to modify how functions are applied over lists, and massively simplifies this task.&lt;/p&gt;
+&lt;p&gt;Here’s the syntax I ended up using:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# run function
+walk(urls, possibly(scrape_pdf, otherwise = NA))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;walk&lt;/code&gt; part here is an alternative to the more commonly-used &lt;code&gt;map&lt;/code&gt;; it’s useful since it triggers function side effects (i.e. all the behind-the-scenes stuff which is the sole purpose of this function) while returning the output invisibly. The &lt;code&gt;possibly&lt;/code&gt; modifier is even more useful, since it gives me an option of telling the function what to return if things go wrong, allowing it to carry on regardless. I also really like that this syntax reads pretty damn close to an English sentence (&lt;em&gt;walk&lt;/em&gt; the &lt;em&gt;urls&lt;/em&gt; and &lt;em&gt;possibly&lt;/em&gt; &lt;em&gt;scrape&lt;/em&gt; the &lt;em&gt;pdf&lt;/em&gt;, &lt;em&gt;otherwise&lt;/em&gt; return &lt;em&gt;NA&lt;/em&gt;). That’s in part due to &lt;code&gt;purrr&lt;/code&gt;’s good design, and in part down to the ability that a functional programming style brings to name your operations something sensible. Since most of us inevitably spend significantly more time reading code than writing it, that’s invaluable.&lt;/p&gt;
+&lt;p&gt;The story has a happy ending — Aisha is delighted with her well-indexed folder of course materials, and is working her way through it steadily and logically. And, pretty much on-brand for me, I more or less lost interest in the problem as soon as the coding bit was done, and have yet to actually look at any of them. I’ll get around to it sometime.&lt;/p&gt;
+</description>
     </item>
     
   </channel>

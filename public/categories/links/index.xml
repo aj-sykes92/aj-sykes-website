@@ -6,19 +6,35 @@
     <description>Recent content in Links on Alasdair Sykes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 09 Aug 2020 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/categories/links/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 09 Aug 2020 00:00:00 +0000</lastBuildDate><atom:link href="/categories/links/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>R community links</title>
       <link>/about-alasdair/</link>
       <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
       
       <guid>/about-alasdair/</guid>
-      <description> At one stage I might have said my coding skills were self-taught — but I would strongly revise that to “community-taught” (credit to @EriPDev and @beeonaposy for introducing me to that phrasing in the context of R). In no particular order, here are the blogs of some folks that have helped me along the way:
-https://www.thedeltanomics.com  https://scottishsnow.wordpress.com  https://www.r-bloggers.com  https://www.rosannavanhespen.nl  https://www.jumpingrivers.com/blog   </description>
+      <description>
+
+
+&lt;p&gt;At one stage I might have said my coding skills were self-taught — but I would strongly revise that to “community-taught” (credit to &lt;a href=&#34;https://twitter.com/EriPDev&#34;&gt;@EriPDev&lt;/a&gt; and &lt;a href=&#34;https://twitter.com/beeonaposy&#34;&gt;@beeonaposy&lt;/a&gt; for introducing me to that phrasing in the context of R). In no particular order, here are the blogs of some folks that have helped me along the way:&lt;/p&gt;
+&lt;div id=&#34;httpswww.thedeltanomics.com&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;a href=&#34;https://www.thedeltanomics.com&#34; class=&#34;uri&#34;&gt;https://www.thedeltanomics.com&lt;/a&gt;&lt;/h3&gt;
+&lt;/div&gt;
+&lt;div id=&#34;httpsscottishsnow.wordpress.com&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;a href=&#34;https://scottishsnow.wordpress.com&#34; class=&#34;uri&#34;&gt;https://scottishsnow.wordpress.com&lt;/a&gt;&lt;/h3&gt;
+&lt;/div&gt;
+&lt;div id=&#34;httpswww.r-bloggers.com&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;a href=&#34;https://www.r-bloggers.com&#34; class=&#34;uri&#34;&gt;https://www.r-bloggers.com&lt;/a&gt;&lt;/h3&gt;
+&lt;/div&gt;
+&lt;div id=&#34;httpswww.rosannavanhespen.nl&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;a href=&#34;https://www.rosannavanhespen.nl&#34; class=&#34;uri&#34;&gt;https://www.rosannavanhespen.nl&lt;/a&gt;&lt;/h3&gt;
+&lt;/div&gt;
+&lt;div id=&#34;httpswww.jumpingrivers.comblog&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;a href=&#34;https://www.jumpingrivers.com/blog&#34; class=&#34;uri&#34;&gt;https://www.jumpingrivers.com/blog&lt;/a&gt;&lt;/h3&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;img src=&#34;/./about-alasdair_files/logo2.png&#34; width=&#34;300&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+</description>
     </item>
     
     <item>
@@ -27,8 +43,27 @@ https://www.thedeltanomics.com  https://scottishsnow.wordpress.com  https://www.
       <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
       
       <guid>/r-community-links/</guid>
-      <description> At one stage I might have said my coding skills were self-taught — but I would strongly revise that to “community-taught” (credit to @EriPDev and @beeonaposy for introducing me to that phrasing in the context of R). In no particular order, here are the blogs of some folks that have helped me along the way:
-https://www.thedeltanomics.com  https://scottishsnow.wordpress.com  https://www.r-bloggers.com  https://www.rosannavanhespen.nl  https://www.jumpingrivers.com/blog  </description>
+      <description>
+
+
+&lt;p&gt;At one stage I might have said my coding skills were self-taught — but I would strongly revise that to “community-taught” (credit to &lt;a href=&#34;https://twitter.com/EriPDev&#34;&gt;@EriPDev&lt;/a&gt; and &lt;a href=&#34;https://twitter.com/beeonaposy&#34;&gt;@beeonaposy&lt;/a&gt; for introducing me to that phrasing in the context of R). In no particular order, here are the blogs of some folks that have helped me along the way:&lt;/p&gt;
+&lt;div id=&#34;httpswww.thedeltanomics.com&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;a href=&#34;https://www.thedeltanomics.com&#34; class=&#34;uri&#34;&gt;https://www.thedeltanomics.com&lt;/a&gt;&lt;/h3&gt;
+&lt;/div&gt;
+&lt;div id=&#34;httpsscottishsnow.wordpress.com&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;a href=&#34;https://scottishsnow.wordpress.com&#34; class=&#34;uri&#34;&gt;https://scottishsnow.wordpress.com&lt;/a&gt;&lt;/h3&gt;
+&lt;/div&gt;
+&lt;div id=&#34;httpswww.r-bloggers.com&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;a href=&#34;https://www.r-bloggers.com&#34; class=&#34;uri&#34;&gt;https://www.r-bloggers.com&lt;/a&gt;&lt;/h3&gt;
+&lt;/div&gt;
+&lt;div id=&#34;httpswww.rosannavanhespen.nl&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;a href=&#34;https://www.rosannavanhespen.nl&#34; class=&#34;uri&#34;&gt;https://www.rosannavanhespen.nl&lt;/a&gt;&lt;/h3&gt;
+&lt;/div&gt;
+&lt;div id=&#34;httpswww.jumpingrivers.comblog&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;a href=&#34;https://www.jumpingrivers.com/blog&#34; class=&#34;uri&#34;&gt;https://www.jumpingrivers.com/blog&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;/./useful-links_files/logo2.png&#34; width=&#34;300&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+</description>
     </item>
     
   </channel>

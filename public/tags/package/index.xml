@@ -6,18 +6,243 @@
     <description>Recent content in package on Alasdair Sykes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 03 Jan 2021 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/tags/package/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 03 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="/tags/package/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>soilc.ipcc --- a new R package for soil carbon modelling</title>
       <link>/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/</link>
       <pubDate>Sun, 03 Jan 2021 00:00:00 +0000</pubDate>
       
       <guid>/2021/01/a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us/</guid>
-      <description>I’ve built a new R package! After nearly a year of rehashing soil carbon modelling code across multiple projects, I finally found the time over the Christmas holidays (when else?) to properly document and contextualise it in a package. I am unapologetically borrowing from the vignette for this new package to form the bulk of this post, since the task of explaining myself intelligently is something I’m lucky to get right once.</description>
+      <description>
+
+
+&lt;blockquote&gt;
+&lt;p&gt;I’ve built a new R package! After nearly a year of rehashing soil carbon modelling code across multiple projects, I finally found the time over the Christmas holidays (when else?) to properly document and contextualise it in a package. I am unapologetically borrowing from the vignette for this new package to form the bulk of this post, since the task of explaining myself intelligently is something I’m lucky to get right once.
+Find the source code for the package &lt;a href=&#34;https://github.com/aj-sykes92/soilc.ipcc&#34;&gt;here&lt;/a&gt;. Ok — the rest of this post is basically a vignette. Enjoy!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div id=&#34;soil-carbon-modelling-in-a-tidyverse-environment-why&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Soil carbon modelling in a &lt;code&gt;tidyverse&lt;/code&gt; environment — why?&lt;/h2&gt;
+&lt;p&gt;Soil carbon is currently one of the most studied and debated topics in the field of agriculture and climate change. Like much which occurs on the boundary of human management and biophysical systems, it’s also extremely challenging to measure or model accurately. To get practical answers to land managers, academics typically need to rely either on simple, empirically calibrated methods, or on highly complex process-based models. Both methods have drawbacks; the former is imprecise, the latter time-consuming, and both are difficult to extrapolate. Finding some middle ground, the Intergovernmental Panel on Climate Change recently (June 2019) released a simplified, globally calibrated three-pool process-based soil carbon model, along with accompanying empirical methods to estimate the required input parameters. The full details of this model are given on the homepage of the &lt;a href=&#34;https://www.ipcc-nggip.iges.or.jp/public/2019rf/vol4.html&#34;&gt;2019 Refinement to the 2006 IPCC Guidelines for
+National Greenhouse Gas Inventories&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This package ties all of this information together in an easy-to-use, flexible model implementation which works from start to end of the modelling process — beginning with management information, ending with a soil carbon stock estimate — and which can be run as a seamless part of a &lt;code&gt;tidyverse&lt;/code&gt;-based workflow.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Disclaimer:&lt;/strong&gt; This package is entirely the creation of its author, and no warranty is given or implied as to its use, or to its fidelity to the modelling framework it represents (with that said, my intention is to reproduce this framework faithfully, so if you notice any errors or omissions, please let me know)!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div id=&#34;installation&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Installation&lt;/h2&gt;
+&lt;p&gt;This package is hosted on Github and can be installed using the &lt;code&gt;devtools&lt;/code&gt; package:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# install.packages(&amp;quot;devtools&amp;quot;)
+devtools::install_github(&amp;quot;aj-sykes92/soilc.ipcc&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note: If this doesn’t work, update &lt;code&gt;devtools&lt;/code&gt;, as Github recently changed the term it uses for the primary version of a source code repository.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div id=&#34;usage-run_model&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Usage — &lt;code&gt;run_model&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2021-01-03-a-new-package-soil-carbon-modelling-in-a-tidyverse-environment.en-us_files/figure-html/front-matter-1.png&#34; width=&#34;960&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The development process for package aimed to tread the line between making things ‘just work’ and giving the accomplished user enough flexibility to use and modify any part of the model independently. In the spirit of doing the fun stuff first, this section will demonstrate the &lt;code&gt;run_model&lt;/code&gt; function — this is a complete, out-of-the-box soil carbon model which will give quick and painless carbon stock change estimates when passed data of the right kind.&lt;/p&gt;
+&lt;p&gt;To help out here, the package also contains a small dataset of exactly the right kind, called &lt;code&gt;toy_input&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;glimpse(toy_input)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 10
+## Columns: 7
+## $ year        &amp;lt;int&amp;gt; 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020
+## $ climdata    &amp;lt;list&amp;gt; [&amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;…
+## $ c_input     &amp;lt;dbl&amp;gt; 5.298971, 4.945811, 5.326737, 4.754702, 4.488324, 4.85921…
+## $ lignin_frac &amp;lt;dbl&amp;gt; 0.005905677, 0.006083535, 0.006065450, 0.005974941, 0.005…
+## $ n_frac      &amp;lt;dbl&amp;gt; 0.05013271, 0.04963280, 0.05039613, 0.05054946, 0.0500886…
+## $ sand_frac   &amp;lt;dbl&amp;gt; 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43
+## $ till_type   &amp;lt;chr&amp;gt; &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;…&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It’s an ordinary tibble, with one list column; this contains a list of nested climate data, each of dimensions 3 * 12:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;glimpse(toy_input$climdata[[1]])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 12
+## Columns: 3
+## $ temp   &amp;lt;dbl&amp;gt; 14.10027, 17.39389, 17.59273, 15.41833, 15.20850, 16.24473, 17…
+## $ precip &amp;lt;dbl&amp;gt; 53.39583, 58.48306, 55.08518, 57.16217, 53.38465, 52.36533, 55…
+## $ pet    &amp;lt;dbl&amp;gt; 46.52958, 43.81984, 42.76176, 44.95919, 44.06107, 40.87934, 44…&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Passed a dataset of this type, the &lt;code&gt;run_model&lt;/code&gt; function will output results with no further input required:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;toy_input %&amp;gt;%
+  run_model() %&amp;gt;%
+  glimpse()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 10
+## Columns: 14
+## $ year           &amp;lt;int&amp;gt; 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, …
+## $ c_input        &amp;lt;dbl&amp;gt; 5.298971, 4.945811, 5.326737, 4.754702, 4.488324, 4.85…
+## $ lignin_frac    &amp;lt;dbl&amp;gt; 0.005905677, 0.006083535, 0.006065450, 0.005974941, 0.…
+## $ n_frac         &amp;lt;dbl&amp;gt; 0.05013271, 0.04963280, 0.05039613, 0.05054946, 0.0500…
+## $ sand_frac      &amp;lt;dbl&amp;gt; 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, …
+## $ till_type      &amp;lt;chr&amp;gt; &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;…
+## $ tfac           &amp;lt;dbl&amp;gt; 0.5189817, 0.4939976, 0.4878877, 0.4758409, 0.4754930,…
+## $ wfac           &amp;lt;dbl&amp;gt; 2.223240, 2.175849, 2.226038, 2.194289, 2.171587, 2.20…
+## $ climdata       &amp;lt;list&amp;gt; [&amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12 x 3]&amp;gt;…
+## $ active_y       &amp;lt;dbl&amp;gt; 0.1820583, 0.1823888, 0.1944128, 0.1805120, 0.1723055,…
+## $ slow_y         &amp;lt;dbl&amp;gt; 1.694165, 1.692363, 1.768588, 1.705763, 1.634969, 1.69…
+## $ passive_y      &amp;lt;dbl&amp;gt; 37.39614, 37.39293, 37.40793, 37.40198, 37.38430, 37.3…
+## $ total_y        &amp;lt;dbl&amp;gt; 39.27237, 39.26768, 39.37093, 39.28825, 39.19157, 39.2…
+## $ c_stock_change &amp;lt;dbl&amp;gt; -0.023740126, -0.004686108, 0.103255479, -0.082681955,…&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;A great deal of intermediate calculations are generated and dropped when &lt;code&gt;run_model&lt;/code&gt; executes with its default arguments; for more information on the model run process, and a better ability to interrogate the results, it’s best to alter the default arguments a bit:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;toy_input %&amp;gt;%
+  run_model(drop_prelim = FALSE, drop_runin = FALSE) %&amp;gt;%
+  glimpse()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 11
+## Columns: 22
+## $ year           &amp;lt;int&amp;gt; NA, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 20…
+## $ c_input        &amp;lt;dbl&amp;gt; 4.958704, 5.298971, 4.945811, 5.326737, 4.754702, 4.48…
+## $ lignin_frac    &amp;lt;dbl&amp;gt; 0.006005288, 0.005905677, 0.006083535, 0.006065450, 0.…
+## $ n_frac         &amp;lt;dbl&amp;gt; 0.05024811, 0.05013271, 0.04963280, 0.05039613, 0.0505…
+## $ sand_frac      &amp;lt;dbl&amp;gt; 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, 0.43, …
+## $ till_type      &amp;lt;chr&amp;gt; &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;, &amp;quot;full&amp;quot;…
+## $ tfac           &amp;lt;dbl&amp;gt; 0.4850891, 0.5189817, 0.4939976, 0.4878877, 0.4758409,…
+## $ wfac           &amp;lt;dbl&amp;gt; 2.195574, 2.223240, 2.175849, 2.226038, 2.194289, 2.17…
+## $ climdata       &amp;lt;list&amp;gt; [NULL, &amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12 x 3]&amp;gt;, &amp;lt;tbl_df[12…
+## $ tillfac        &amp;lt;dbl&amp;gt; 3.036, 3.036, 3.036, 3.036, 3.036, 3.036, 3.036, 3.036…
+## $ alpha          &amp;lt;dbl&amp;gt; 2.528185, 2.701829, 2.521510, 2.715727, 2.424212, 2.28…
+## $ k_a            &amp;lt;dbl&amp;gt; 13.69867, 14.84046, 13.82492, 13.96887, 13.42965, 13.2…
+## $ k_s            &amp;lt;dbl&amp;gt; 0.6757991, 0.7321271, 0.6820271, 0.6891289, 0.6625271,…
+## $ k_p            &amp;lt;dbl&amp;gt; 0.007338187, 0.007949827, 0.007405814, 0.007482929, 0.…
+## $ active_y_ss    &amp;lt;dbl&amp;gt; 0.1845569, 0.1820583, 0.1823888, 0.1944128, 0.1805120,…
+## $ slow_y_ss      &amp;lt;dbl&amp;gt; 1.711369, 1.687870, 1.691523, 1.802973, 1.673761, 1.59…
+## $ passive_y_ss   &amp;lt;dbl&amp;gt; 37.40018, 36.89231, 36.96202, 39.39844, 36.58002, 34.9…
+## $ active_y       &amp;lt;dbl&amp;gt; 0.1845569, 0.1820583, 0.1823888, 0.1944128, 0.1805120,…
+## $ slow_y         &amp;lt;dbl&amp;gt; 1.711369, 1.694165, 1.692363, 1.768588, 1.705763, 1.63…
+## $ passive_y      &amp;lt;dbl&amp;gt; 37.40018, 37.39614, 37.39293, 37.40793, 37.40198, 37.3…
+## $ total_y        &amp;lt;dbl&amp;gt; 39.29611, 39.27237, 39.26768, 39.37093, 39.28825, 39.1…
+## $ c_stock_change &amp;lt;dbl&amp;gt; 0.000000000, -0.023740126, -0.004686108, 0.103255479, …&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can also choose whether or not to deal with the nested climate data inside or outside of the &lt;code&gt;run_model&lt;/code&gt; function. This is useful primarily because the role of climate data varies with model usage — where it might be important to have annually-specific climate datasets for one use-case, an annual average will do for another. This climate data is a multiplying factor for file size, so it’s useful to not be forced to over-inflate a file through repetitions. Here’s how this works:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# with automated climfac calculation
+x &amp;lt;- run_model(toy_input) # default calculate_climfacs = TRUE
+
+# with manual climfac calculation
+y &amp;lt;- toy_input %&amp;gt;%
+  mutate(
+    tfac = map_dbl(climdata, ~tfac(.x$temp)),
+    wfac = map_dbl(climdata, ~wfac(.x$precip, .x$pet))
+    ) %&amp;gt;%
+  run_model(calculate_climfacs = FALSE)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here, &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are identical datasets. Obviously, the &lt;code&gt;x&lt;/code&gt; method is more efficient if you need every &lt;code&gt;climdata&lt;/code&gt; object to be different, by the &lt;code&gt;y&lt;/code&gt; method separates this operation from &lt;code&gt;run_model&lt;/code&gt; in case you want to calculate &lt;code&gt;tfac&lt;/code&gt; and &lt;code&gt;wfac&lt;/code&gt; first, and repeat them over multiple datasets (say, perhaps, 10 different treatments in the same study site) before running the model.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;run_model&lt;/code&gt; function also contains default arguments naming each of the individual parameters it requires from the &lt;code&gt;data&lt;/code&gt; object — it’s anticipated these will be ignored 99.9% of the time, but they provide flexibility so you can modify the function behaviour rather than changing your data if you so desire.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;usage-the-input-data-setup-functions&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Usage — the input data setup functions&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;toy_input&lt;/code&gt; dataset we’ve been working with thus far contains exactly what the soil carbon model needs to know in order to make an estimate of soil C stocks; however, the type of information contained (e.g. carbon inputs, lignin fractions; run &lt;code&gt;?toy_input&lt;/code&gt; for full descriptions of all the variables) is rarely readily available to most land managers. To help set up the model, this package also contains functions for processing the kind of information which a land manager is likely to know (e.g. crop yields, manure application rates) and converts it into an input that the model expects.&lt;/p&gt;
+&lt;p&gt;To make this happen, the package has a two-tiered set of functions. The highest tier contains just one function, &lt;code&gt;build_soil_input&lt;/code&gt; — this function can take as many arguments as you care to pass it, and it expects the output of a set of second-tier helper functions to form these inputs. These functions are &lt;code&gt;add_crop&lt;/code&gt; and &lt;code&gt;add_manure&lt;/code&gt;. We will demonstrate these first:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;crop1 &amp;lt;- add_crop(crop = &amp;quot;wheat&amp;quot;, yield_tha = rep(7.2, 10), frac_remove = 0.3, frac_renew = 1)
+manure1 &amp;lt;- add_manure(livestock_type = &amp;quot;beef_cattle&amp;quot;, n_rate = rep(100, 10))
+
+str(crop1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## List of 4
+##  $ crop       : chr &amp;quot;wheat&amp;quot;
+##  $ yield_tha  : num [1:10] 7.2 7.2 7.2 7.2 7.2 7.2 7.2 7.2 7.2 7.2
+##  $ frac_remove: num 0.3
+##  $ frac_renew : num 1
+##  - attr(*, &amp;quot;class&amp;quot;)= chr [1:2] &amp;quot;crop&amp;quot; &amp;quot;list&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;str(manure1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## List of 2
+##  $ livestock_type: chr &amp;quot;beef_cattle&amp;quot;
+##  $ n_rate        : num [1:10] 100 100 100 100 100 100 100 100 100 100
+##  - attr(*, &amp;quot;class&amp;quot;)= chr [1:2] &amp;quot;manure&amp;quot; &amp;quot;list&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;These list objects are admittedly not very human-readable, but they aren’t supposed to be. When passed to &lt;code&gt;build_soil_input&lt;/code&gt;, the function maps an S3 method across the arguments list, and uses the information contained to make an estimate of the key parameters:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;build_soil_input(crop1, manure1) %&amp;gt;%
+  glimpse()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Rows: 10
+## Columns: 6
+## $ om_input     &amp;lt;dbl&amp;gt; 15.71912, 15.71912, 15.71912, 15.71912, 15.71912, 15.719…
+## $ c_input      &amp;lt;dbl&amp;gt; 6.675944, 6.675944, 6.675944, 6.675944, 6.675944, 6.6759…
+## $ n_input      &amp;lt;dbl&amp;gt; 0.1790305, 0.1790305, 0.1790305, 0.1790305, 0.1790305, 0…
+## $ lignin_input &amp;lt;dbl&amp;gt; 0.9939831, 0.9939831, 0.9939831, 0.9939831, 0.9939831, 0…
+## $ n_frac       &amp;lt;dbl&amp;gt; 0.01138935, 0.01138935, 0.01138935, 0.01138935, 0.011389…
+## $ lignin_frac  &amp;lt;dbl&amp;gt; 0.063234, 0.063234, 0.063234, 0.063234, 0.063234, 0.0632…&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The output tibble is of correct format to provide the organic matter elements to a &lt;code&gt;run_model&lt;/code&gt; input dataframe. Multiple manure applications — or complex management strategies like cover cropping — can be absorbed since &lt;code&gt;build_soil_input&lt;/code&gt; has no expectations as to the number of arguments. Note also that the single-value (scalar) elements specified in &lt;code&gt;add_crop&lt;/code&gt; and &lt;code&gt;add_manure&lt;/code&gt; are recycled, and the output is 10 rows long, the same as the vector elements. If you pass vectors of different &amp;gt; 1 lengths to &lt;code&gt;build_soil_input&lt;/code&gt;, it will pad the end of the shorter vectors with zeroes to enable it to continue, and warn you that you’ve probably/possibly made an error in your inputs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;usage-levelling-up-to-multiple-model-runs&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Usage — levelling up to multiple model runs&lt;/h2&gt;
+&lt;p&gt;Usually when you’re running a model of this type, you want to do it more than once. Whether it’s multiple years, multiple climate scenarios, multiple grid cells or multiple management scenarios, it’s very unlikely you’re going to be one-and-done with your modelling. With this in mind, this package has been designed to work as well as possible with &lt;code&gt;tidyverse&lt;/code&gt;’s &lt;code&gt;purrr&lt;/code&gt;, and the list-wise and nested-tibble operations this allows. All the functions — and particularly &lt;code&gt;run_model&lt;/code&gt; — work well with lists and it is anticipated they will be used in this context.&lt;/p&gt;
+&lt;p&gt;This post is not intended to be a tutorial on &lt;code&gt;purrr&lt;/code&gt; (go &lt;a href=&#34;https://r4ds.had.co.nz/iteration.html&#34;&gt;here&lt;/a&gt; for that), so the best way to demonstrate is by example. The header plot for the &lt;code&gt;run_model&lt;/code&gt; section of this post was built with the &lt;code&gt;toy_input&lt;/code&gt; used to demonstrate the package, along with some random sampling and iteration with &lt;code&gt;purrr&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# function build 100-row dataset by replicating toy_input 10x
+build_fake_data &amp;lt;- function(data) {
+  map(1:10, ~data) %&amp;gt;%
+    bind_rows() %&amp;gt;%
+    mutate(year = 2001:2100,
+           mod_fac = seq(from = 1, to = runif(1, 0.5, 2), length.out = 100) + rnorm(100, 0, 0.02),
+           c_input = c_input * mod_fac,
+           till_type = ifelse(year &amp;gt; sample(2001:2100, 1), &amp;quot;reduced&amp;quot;, till_type)) %&amp;gt;%
+    select(-mod_fac)
+}
+
+# build 10 fake datasets with random inputs
+set.seed(2065)
+fake_data &amp;lt;- map(1:10, ~build_fake_data(toy_input))
+
+# map run model across list
+output &amp;lt;- map(fake_data, run_model)
+
+# plot
+output %&amp;gt;%
+  set_names(paste0(&amp;quot;run_&amp;quot;, 1:10)) %&amp;gt;%
+  bind_rows(.id = &amp;quot;run&amp;quot;) %&amp;gt;%
+  ggplot(aes(x = year, y = total_y, group = run)) +
+  geom_line(colour = &amp;quot;darkred&amp;quot;,) +
+  labs(x = &amp;quot;Year&amp;quot;,
+       y = expression(&amp;quot;Soil C stocks, tonnes C ha&amp;quot;^{-1})) +
+  theme_classic()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;package-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Package data&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;toy_input&lt;/code&gt; data used in the above examples is just the tip of the iceberg for package data. This section covers the data utilised in package functions, which is also made available to the user for information and modification if desired.&lt;/p&gt;
+&lt;div id=&#34;soil-carbon-model-parameters&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Soil carbon model parameters&lt;/h3&gt;
+&lt;p&gt;All functions which run under the wrapper function &lt;code&gt;run_model&lt;/code&gt;, and this wrapper function itself, make use of a named list object containing model parameters. This object is passed to the final argument of each function, &lt;code&gt;params&lt;/code&gt;. The default parameter list can be directly accessed by the user, and contains all parameters and accompanying descriptions:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(soilc_params, 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## $tillfac_ft
+## $tillfac_ft$be
+## [1] 3.036
+## 
+## $tillfac_ft$sd
+## [1] 0.579
+## 
+## $tillfac_ft$min
+## [1] 1.4
+## 
+## $tillfac_ft$max
+## [1] 4
+## 
+## $tillfac_ft$desc
+## [1] &amp;quot;Tillage disturbance modifier for decay rates under full tillage&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;names(soilc_params)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  [1] &amp;quot;tillfac_ft&amp;quot; &amp;quot;tillfac_rt&amp;quot; &amp;quot;tillfac_nt&amp;quot; &amp;quot;wfacpar1&amp;quot;   &amp;quot;wfacpar2&amp;quot;  
+##  [6] &amp;quot;wfacpar3&amp;quot;   &amp;quot;kfaca&amp;quot;      &amp;quot;k3par1&amp;quot;     &amp;quot;k3par2&amp;quot;     &amp;quot;kfacs&amp;quot;     
+## [11] &amp;quot;kfacp&amp;quot;      &amp;quot;f1&amp;quot;         &amp;quot;f2&amp;quot;         &amp;quot;f2_ft&amp;quot;      &amp;quot;f2_rt&amp;quot;     
+## [16] &amp;quot;f2_nt&amp;quot;      &amp;quot;f3&amp;quot;         &amp;quot;f4par1&amp;quot;     &amp;quot;f4par2&amp;quot;     &amp;quot;f5&amp;quot;        
+## [21] &amp;quot;f6&amp;quot;         &amp;quot;f7&amp;quot;         &amp;quot;f8&amp;quot;         &amp;quot;ta&amp;quot;         &amp;quot;tb&amp;quot;        
+## [26] &amp;quot;tmax&amp;quot;       &amp;quot;topt&amp;quot;       &amp;quot;sp1&amp;quot;        &amp;quot;sp2&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If the user wishes to modify the default parameters, this list can be used as the basis for a custom model parameter object, and this passed to &lt;code&gt;run_model&lt;/code&gt; or any of its core functions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;soil-input-function-parameters&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Soil input function parameters&lt;/h3&gt;
+&lt;p&gt;The setup for the model input data (&lt;code&gt;build_soil_inputs&lt;/code&gt;) also requires a number of core datasets. These are made available to the user in the same way, and can be accessed under &lt;code&gt;crop_agrc&lt;/code&gt; (above-ground residue coefficients), &lt;code&gt;crop_bgrc&lt;/code&gt; (below-ground residue coefficients), &lt;code&gt;crop_fractions&lt;/code&gt; (crop nitrogen and lignin fractions) and &lt;code&gt;man_fractions&lt;/code&gt; (manure nitrogen and lignin fractions).&lt;/p&gt;
+&lt;p&gt;The following may also be useful in determining possible arguments for &lt;code&gt;crop&lt;/code&gt; and &lt;code&gt;livestock_type&lt;/code&gt; in the &lt;code&gt;add_*&lt;/code&gt; functions:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;names(crop_fractions)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  [1] &amp;quot;alfalfa&amp;quot;             &amp;quot;barley&amp;quot;              &amp;quot;beans_and_pulses&amp;quot;   
+##  [4] &amp;quot;grass&amp;quot;               &amp;quot;grass_clover_mix&amp;quot;    &amp;quot;maize&amp;quot;              
+##  [7] &amp;quot;millet&amp;quot;              &amp;quot;n_fixing_forage&amp;quot;     &amp;quot;non_legume_hay&amp;quot;     
+## [10] &amp;quot;non_n_fixing_forage&amp;quot; &amp;quot;oats&amp;quot;                &amp;quot;peanut&amp;quot;             
+## [13] &amp;quot;potato&amp;quot;              &amp;quot;rice&amp;quot;                &amp;quot;rye&amp;quot;                
+## [16] &amp;quot;sorghum&amp;quot;             &amp;quot;soybean&amp;quot;             &amp;quot;spring_wheat&amp;quot;       
+## [19] &amp;quot;tubers&amp;quot;              &amp;quot;wheat&amp;quot;               &amp;quot;winter_wheat&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;names(man_fractions)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;dairy_cattle&amp;quot; &amp;quot;beef_cattle&amp;quot;  &amp;quot;poultry&amp;quot;      &amp;quot;swine&amp;quot;        &amp;quot;horses&amp;quot;      
+## [6] &amp;quot;sheep&amp;quot;        &amp;quot;none&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;acknowledgements&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Acknowledgements&lt;/h2&gt;
+&lt;p&gt;Thanks to the Natural Environment Research Council, the Legumes Translated project, and the University of Edinburgh/Scotland’s Rural College MSc programmes for providing the context, projects and requirements which led to the development of much of the code in this package. &lt;a href=&#34;https://github.com/csgillespie&#34;&gt;Colin Gillespie&lt;/a&gt; has been an incredible and approachable mentor, and his input to my coding generally has undoubtedly influenced the development of this package. The package is based around &lt;code&gt;tidyverse&lt;/code&gt; ideas and functions, so thanks go also to Hadley Wickham and the &lt;code&gt;tidyverse&lt;/code&gt; team for building and maintaining this incredible environment.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;contribute&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Contribute&lt;/h2&gt;
+&lt;p&gt;If you would like to contribute to this package, please file an issue, make a pull request on GitHub, or contact the author on Twitter &lt;a href=&#34;https://twitter.com/alasdair_sykes&#34;&gt;@alasdair_sykes&lt;/a&gt; or by email at &lt;a href=&#34;mailto:alasdair.sykes@sruc.ac.uk&#34; class=&#34;email&#34;&gt;alasdair.sykes@sruc.ac.uk&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</description>
     </item>
     
   </channel>
