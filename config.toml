@@ -61,24 +61,24 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
   name = "About Alasdair"
   pre = "<i class=\"sidebar-button-icon fa fa-lg fa-user\"></i>"
   url = "/#about"
-[[menu.main]]
-  weight = 3
-  identifier = "cv"
-  name = "Curriculum Vitae"
-  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-graduation-cap\"></i>"
-  url = "/alasdair-cv.pdf"
+#[[menu.main]]
+#  weight = 3
+#  identifier = "cv"
+#  name = "Curriculum Vitae"
+#  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-graduation-cap\"></i>"
+#  url = "/alasdair-cv.pdf"
 #[[menu.main]]
 #  weight = 4
 #  identifier = "categories"
 #  name = "Categories"
 #  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-bookmark\"></i>"
 #  url = "/categories"
-[[menu.main]]
-  weight = 4
-  identifier = "shiny"
-  name = "Shiny"
-  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-code\"></i>"
-  url = "/shiny-apps"
+#[[menu.main]]
+#  weight = 4
+#  identifier = "shiny"
+#  name = "Shiny"
+#  pre = "<i class=\"sidebar-button-icon fa fa-lg fa-code\"></i>"
+#  url = "/shiny-apps"
 
 [[menu.links]]
   weight = 1

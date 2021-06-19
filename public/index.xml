@@ -51,16 +51,6 @@ https://www.thedeltanomics.com  https://scottishsnow.wordpress.com  https://www.
     </item>
     
     <item>
-      <title>Shiny application showcase</title>
-      <link>/shiny-apps/</link>
-      <pubDate>Sun, 09 Aug 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/shiny-apps/</guid>
-      <description>Communicating environmental data science insights via Shiny applications is just about my favourite part of my job. Given the range of contexts and places in which I’m finding myself building apps, I wanted to maintain a page which keeps up-to-date links to the apps next to a record of the context in which they were built. Here they are:
- July 2020 | A decision-support tool for agroforestry policymakers An add-on to an extended modelling project, this app provides an interactive user interface for some of the most interesting data science I’ve done in a while.</description>
-    </item>
-    
-    <item>
       <title>Migrating your workflow to R — 6 easy(ish) steps</title>
       <link>/2020/08/migrating-your-workflow-to-r.en-us/</link>
       <pubDate>Tue, 04 Aug 2020 00:00:00 +0000</pubDate>
